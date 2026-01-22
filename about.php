@@ -1,4 +1,5 @@
 <?php 
+require_once 'config.php';
 $page_title = 'About Us | CASA VÉRA Furniture'; 
 $page_class = 'about-page';
 include 'includes/header.php'; 

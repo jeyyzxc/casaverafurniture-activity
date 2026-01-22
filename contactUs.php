@@ -1,4 +1,5 @@
 <?php
+require_once 'config.php';
 $page_title = 'Contact Us | CASA VÉRA Furniture'; 
 $page_class = 'contact-page';
 

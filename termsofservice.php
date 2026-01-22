@@ -1,4 +1,5 @@
 <?php 
+require_once 'config.php';
 $page_title = 'Terms of Service | CASA VÉRA Furniture'; 
 $page_class = 'legal-page'; 
 include('includes/header.php'); 

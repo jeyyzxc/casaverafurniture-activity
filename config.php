@@ -1,15 +1,16 @@
 <?php
-// 1. Start Session (Must be the very first line)
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// 2. Database Configuration
+// config.php
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'casaverafurniture'); // Use your specific DB name
+define('DB_NAME', 'casaverafurniture'); // CONFIRMED from your screenshot
 define('DB_USER', 'root');
 define('DB_PASS', '');
 
-// 3. Application Constants
-define('APP_NAME', 'CASA VÉRA');
+// Strict Session Security
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_secure', 0); // Change to 1 if using HTTPS
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>

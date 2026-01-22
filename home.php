@@ -89,7 +89,8 @@ include 'includes/header.php';
                     <div class="product-info mt-3 text-center">
                         <h5 class="product-title brand-font">Velvet Lounge Chair</h5>
                         <p class="product-price">₱6,599.00</p>
-                        <button class="btn btn-outline-dark btn-sm rounded-pill px-4" onclick="App.addToCart({id:1, name:'Velvet Lounge Chair', price:6599})">Add to Cart</button>
+                        <button class="btn btn-outline-dark btn-sm rounded-pill px-4 btn-action-home" 
+                                data-id="1" data-action="add">Add to Cart</button>
                     </div>
                 </div>
             </div>
@@ -121,7 +122,8 @@ include 'includes/header.php';
                     <div class="product-info mt-3 text-center">
                         <h5 class="product-title brand-font">Cloud Sofa</h5>
                         <p class="product-price">₱12,500.00</p>
-                        <button class="btn btn-outline-dark btn-sm rounded-pill px-4" onclick="App.addToCart({id:3, name:'Cloud Sofa', price:12500})">Add to Cart</button>
+                        <button class="btn btn-outline-dark btn-sm rounded-pill px-4 btn-action-home" 
+                                data-id="3" data-action="add">Add to Cart</button>
                     </div>
                 </div>
             </div>

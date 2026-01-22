@@ -96,11 +96,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Input Sanitization
+    // UPDATE: Input Sanitization List
     const fieldsToValidate = [
         { id: 'modalEmail', type: 'email' },
         { id: 'signupEmail', type: 'email' },
-        { id: 'signupName',  type: 'text' }
+        { id: 'signupFirstName', type: 'text' }, // Updated
+        { id: 'signupLastName',  type: 'text' }  // Updated
     ];
 
     fieldsToValidate.forEach(field => {

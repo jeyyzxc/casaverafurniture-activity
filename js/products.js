@@ -1,10 +1,5 @@
 /**
  * products.js
- * Handles product rendering, filtering, sorting, and QUICK VIEW logic.
- */
-
-/**
- * products.js
  * Handles product rendering, filtering, sorting, and Quick View.
  */
 
@@ -116,30 +111,31 @@ const ProductManager = (() => {
         }
     };
 
-    // 4. ATTACH EVENTS
+    // 4. ATTACH EVENTS (UPDATED FOR REDIRECT)
     const attachEvents = () => {
+        // A. ADD TO CART (Persistent)
         document.querySelectorAll('.btn-add-cart').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                const id = parseInt(e.currentTarget.getAttribute('data-id'));
-                const product = allProducts.find(p => p.id === id);
-                if(product && window.App) window.App.addToCart(product); 
+                // ... get ID ...
+                // Pass 'add' as action, null as callback
+                if(window.App) window.App.addToCart({ id: id }, 'add', null); 
             });
         });
 
+        // B. BUY NOW (Temporary / Flash)
         document.querySelectorAll('.btn-buy-now').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                const id = parseInt(e.currentTarget.getAttribute('data-id'));
-                const product = allProducts.find(p => p.id === id);
-                if(product && window.App) {
-                    window.App.addToCart(product, () => {
+                // ... get ID ...
+                if(window.App) {
+                    // Pass 'buy' as action, Redirect as callback
+                    window.App.addToCart({ id: id }, 'buy', () => {
                         window.location.href = 'cart.php';
                     });
                 }
             });
         });
 
+        // C. Quick View Trigger
         document.querySelectorAll('.trigger-qv').forEach(el => {
             el.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -149,7 +145,7 @@ const ProductManager = (() => {
         });
     };
 
-    // 5. QUICK VIEW LOGIC
+    // 5. QUICK VIEW LOGIC (UPDATED)
     const openQuickView = (id) => {
         const product = allProducts.find(p => p.id === id);
         if(!product) return;
@@ -170,8 +166,15 @@ const ProductManager = (() => {
         dom.qv.btnCart = newCartBtn;
         dom.qv.btnBuy = newBuyBtn;
 
-        dom.qv.btnCart.addEventListener('click', () => { if(window.App) window.App.addToCart(product); });
-        dom.qv.btnBuy.addEventListener('click', () => { if(window.App) window.App.addToCart(product, () => { window.location.href = 'cart.php'; }); });
+        // Add to Cart inside QV (Stay)
+        dom.qv.btnCart.addEventListener('click', () => { 
+            if(window.App) window.App.addToCart(product, null); 
+        });
+        
+        // Buy Now inside QV (Redirect)
+        dom.qv.btnBuy.addEventListener('click', () => { 
+            if(window.App) window.App.addToCart(product, () => { window.location.href = 'cart.php'; }); 
+        });
 
         dom.qv.overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -231,19 +234,14 @@ const ProductManager = (() => {
         dom.qv.overlay.addEventListener('click', (e) => { if(e.target === dom.qv.overlay) closeQuickView(); });
         document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeQuickView(); });
 
-        // I. FILTER TOGGLE LOGIC (New Addition)
         const toggleFilter = (toggleId, listId, arrowId) => {
             const toggle = document.getElementById(toggleId);
             const list = document.getElementById(listId);
             const arrow = document.getElementById(arrowId);
-            
             if(toggle && list && arrow) {
                 toggle.addEventListener('click', () => {
                     list.classList.toggle('d-none');
-                    // Rotate arrow: 0deg is down (open), -90deg is side (closed)
-                    arrow.style.transform = list.classList.contains('d-none') 
-                        ? 'rotate(-90deg)' 
-                        : 'rotate(0deg)';
+                    arrow.style.transform = list.classList.contains('d-none') ? 'rotate(-90deg)' : 'rotate(0deg)';
                 });
             }
         };

@@ -51,31 +51,14 @@
             </div>
         </div>
     </footer>
-
     <?php 
-        // Ensure this path is correct based on your folder structure
-        if(file_exists('includes/login-modal.php')) {
-            include 'includes/login-modal.php'; 
-        }
+        if(file_exists('login.php')) include 'login.php'; 
+        if(file_exists('signUp.php')) include 'signUp.php'; 
     ?>
-    <?php 
-        if(file_exists('includes/signup-modal.php')) {
-            include 'includes/signup-modal.php'; 
-        }
-    ?>
-
-    <link rel="stylesheet" href="css/header-footer.css">
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/jquery.validation/1.19.5/jquery.validate.min.js"></script>
-
     <script src="js/main.js"></script>
     <script src="js/header-footer.js"></script>
-    <script src="js/forms.js"></script>
-    <script src="js/animations.js"></script>
-
-    <script src="js/login-signupModal.js"></script>
-
-</body>
-</html>
+    <script src="js/login-signupModal.js"></script> </body>
+    </html>
