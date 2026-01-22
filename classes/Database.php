@@ -19,6 +19,11 @@ class Database {
      * Automatically connects to the database when you write: $db = new Database();
      */
     public function __construct() {
+        // 0. Defensive Check: Ensure config is loaded
+        if (!defined('DB_HOST')) {
+            throw new Exception("Configuration Error: config.php not loaded. Database constants are missing.");
+        }
+
         // 1. Load credentials from config.php constants
         $this->host     = DB_HOST;
         $this->dbname   = DB_NAME;
@@ -39,16 +44,14 @@ class Database {
         try {
             $this->pdo = new PDO($dsn, $this->username, $this->password, $options);
         } catch (PDOException $e) {
-            // If connection fails, stop everything and show why
-            die("Database Connection Failed: " . $e->getMessage());
+            // Throw exception so it can be caught by the calling script
+            throw new Exception("Database Connection Failed: " . $e->getMessage());
         }
     }
 
     /**
      * Helper: Run a Query
      * Used internally by fetchAll/fetchOne, or for UPDATE/INSERT/DELETE
-     * * @param string $sql The SQL query (e.g., "SELECT * FROM users WHERE id = ?")
-     * @param array $params The values to fill in the '?' placeholders
      */
     public function query($sql, $params = []) {
         try {
@@ -56,7 +59,8 @@ class Database {
             $stmt->execute($params);
             return $stmt;
         } catch (PDOException $e) {
-            die("Query Failed: " . $e->getMessage());
+            // Throw exception so add_to_cart.php can catch it and return JSON
+            throw new Exception("Query Failed: " . $e->getMessage());
         }
     }
 
@@ -93,6 +97,34 @@ class Database {
     public function rowCount($sql, $params = []) {
         $stmt = $this->query($sql, $params);
         return $stmt->rowCount();
+    }
+
+    // =========================================================
+    // NEW: Transaction Methods (Required for Checkout)
+    // =========================================================
+
+    /**
+     * Start a Transaction
+     * Used when you need to run multiple queries that depend on each other.
+     */
+    public function beginTransaction() {
+        return $this->pdo->beginTransaction();
+    }
+
+    /**
+     * Commit a Transaction
+     * Save all changes made during the transaction.
+     */
+    public function commit() {
+        return $this->pdo->commit();
+    }
+
+    /**
+     * Rollback a Transaction
+     * Undo changes if something went wrong.
+     */
+    public function rollBack() {
+        return $this->pdo->rollBack();
     }
 }
 ?>

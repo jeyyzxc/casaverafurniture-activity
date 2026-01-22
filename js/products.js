@@ -1,186 +1,282 @@
 /**
  * products.js
- * Handles product rendering, filtering, and sorting.
- * Depends on: App.js (for Cart)
+ * Handles product rendering, filtering, sorting, and QUICK VIEW logic.
+ */
+
+/**
+ * products.js
+ * Handles product rendering, filtering, sorting, and QUICK VIEW logic.
  */
 
 const ProductManager = (() => {
     
     // 1. STATE & DATA
-    const state = {
-        products: [
-            { id: 1, name: "The Italian Sofa", category: "Living", price: 185000.00, image: "p1.jpg", isNew: true, dateAdded: "2023-10-01" },
-            { id: 2, name: "Marble Dining Table", category: "Dining", price: 125000.00, image: "p2.jpg", isNew: false, dateAdded: "2023-09-15" },
-            { id: 3, name: "Crystal Chandelier", category: "Lighting", price: 65000.00, image: "p3.jpg", isNew: false, dateAdded: "2023-08-20" },
-            { id: 4, name: "Velvet Armchair", category: "Living", price: 45000.00, image: "p1.jpg", isNew: false, dateAdded: "2023-09-10" },
-            { id: 5, name: "Royal King Bed", category: "Bedroom", price: 280000.00, image: "p2.jpg", isNew: true, dateAdded: "2023-10-05" },
-            { id: 6, name: "Abstract Gold Vase", category: "Decor", price: 18500.00, image: "p3.jpg", isNew: true, dateAdded: "2023-10-10" },
-            { id: 7, name: "Minimalist Lamp", category: "Lighting", price: 4500.00, image: "p1.jpg", isNew: false, dateAdded: "2023-07-10" },
-            { id: 8, name: "Silk Throw Pillow", category: "Decor", price: 2500.00, image: "p2.jpg", isNew: false, dateAdded: "2023-06-10" }
-        ],
-        filters: {
-            search: '',
-            category: 'All',
-            minPrice: 0,
-            maxPrice: 300000
-        },
+    const defaultState = {
+        filters: { search: '', category: 'All', minPrice: 0, maxPrice: 300000 },
         sort: 'newest'
     };
+
+    let state = JSON.parse(JSON.stringify(defaultState));
+    let allProducts = [];
 
     // 2. DOM ELEMENTS
     const dom = {
         grid: document.getElementById('productGrid'),
         count: document.getElementById('productCount'),
+        collectionTitle: document.getElementById('collectionTitle'),
         noResults: document.getElementById('noResults'),
         inputs: {
             search: document.getElementById('searchInput'),
             categoryItems: document.querySelectorAll('.category-item'),
-            categoryHidden: document.getElementById('categorySelect'),
             priceRange: document.getElementById('priceRange'),
             priceMaxDisplay: document.getElementById('priceValueMax'),
             pricePresets: document.getElementsByName('pricePreset'),
             sort: document.getElementById('sortSelect'),
-            resetBtn: document.getElementById('resetFiltersIcon'), // Updated ID
-            applyBtn: document.getElementById('applyFiltersBtn')   // New ID
+            resetBtn: document.getElementById('resetFiltersIcon'),
+            applyBtn: document.getElementById('applyFiltersBtn')
         },
-        toggles: {
-            cat: document.getElementById('categoryToggle'),
-            catList: document.getElementById('categoryList'),
-            catArrow: document.getElementById('categoryArrow'),
-            price: document.getElementById('priceToggle'),
-            priceList: document.getElementById('priceList'),
-            priceArrow: document.getElementById('priceArrow')
+        // Quick View Elements
+        qv: {
+            overlay: document.getElementById('quickViewOverlay'),
+            card: document.getElementById('quickViewCard'),
+            close: document.getElementById('closeQuickView'),
+            imgContainer: document.querySelector('.qv-image-col'), // Required for badge injection
+            img: document.getElementById('qvImage'),
+            name: document.getElementById('qvName'),
+            cat: document.getElementById('qvCategory'),
+            price: document.getElementById('qvPrice'),
+            desc: document.getElementById('qvDesc'),
+            btnCart: document.querySelector('.btn-add-cart-qv'),
+            btnBuy: document.querySelector('.btn-buy-now-qv')
         }
     };
 
     // 3. RENDER LOGIC
     const render = () => {
-        // A. Filter
-        let filtered = state.products.filter(p => {
+        let filtered = allProducts.filter(p => {
             const matchesSearch = p.name.toLowerCase().includes(state.filters.search);
             const matchesCat = state.filters.category === 'All' || p.category === state.filters.category;
-            const matchesPrice = p.price >= state.filters.minPrice && p.price <= state.filters.maxPrice;
+            const pPrice = Number(p.price);
+            const matchesPrice = pPrice >= state.filters.minPrice && pPrice <= state.filters.maxPrice;
             return matchesSearch && matchesCat && matchesPrice;
         });
 
-        // B. Sort
-        if (state.sort === 'price_low') filtered.sort((a, b) => a.price - b.price);
-        else if (state.sort === 'price_high') filtered.sort((a, b) => b.price - a.price);
-        else if (state.sort === 'newest') filtered.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
-        else if (state.sort === 'name_asc') filtered.sort((a, b) => a.name.localeCompare(b.name));
+        switch (state.sort) {
+            case 'price_low':  filtered.sort((a, b) => Number(a.price) - Number(b.price)); break;
+            case 'price_high': filtered.sort((a, b) => Number(b.price) - Number(a.price)); break;
+            case 'name_asc':   filtered.sort((a, b) => a.name.localeCompare(b.name)); break;
+            case 'newest':     
+            default:           filtered.sort((a, b) => new Date(b.date_added) - new Date(a.date_added)); break;
+        }
 
-        // C. Update UI
         dom.grid.innerHTML = '';
         dom.count.textContent = filtered.length;
+        dom.collectionTitle.textContent = state.filters.category === 'All' ? 'All Collections' : `${state.filters.category} Collection`;
 
         if (filtered.length === 0) {
             dom.noResults.classList.remove('d-none');
-            return;
         } else {
             dom.noResults.classList.add('d-none');
-        }
+            
+            filtered.forEach((product, index) => {
+                const priceFormatted = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(product.price);
+                const isNew = product.is_new == 1;
+                const badge = isNew ? '<span class="badge-luxury">New Arrival</span>' : '';
+                const imagePath = product.image.includes('/') ? product.image : `src/images/${product.image}`;
 
-        // D. Create Cards
-        filtered.forEach((product, index) => {
-            const price = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(product.price);
-            const badge = product.isNew ? '<span class="badge-luxury">New Arrival</span>' : '';
-            
-            const col = document.createElement('div');
-            col.className = 'col-md-6 col-lg-4';
-            col.style.animation = `fadeInUp 0.5s ease-out forwards ${index * 0.05}s`; // Staggered Animation
-            
-            col.innerHTML = `
-                <div class="card h-100 border-0 shadow-sm product-card overflow-hidden">
-                    <div class="product-img-wrapper">
-                        ${badge}
-                        <img src="src/images/${product.image}" class="product-img" alt="${product.name}">
-                        
-                        <div class="product-actions-overlay">
-                            <a href="product-details.php?id=${product.id}" class="btn-action-icon" title="View Details">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <button class="btn-action-icon btn-add-cart" data-id="${product.id}" title="Add to Cart">
-                                <i class="fas fa-shopping-bag"></i>
-                            </button>
+                const col = document.createElement('div');
+                col.className = 'col-md-6 col-lg-4';
+                col.style.animation = `fadeInUp 0.5s ease-out forwards ${index * 0.05}s`; 
+
+                col.innerHTML = `
+                    <div class="card h-100 border-0 shadow-sm product-card overflow-hidden">
+                        <div class="product-img-wrapper">
+                            ${badge}
+                            <img src="${imagePath}" class="product-img trigger-qv" data-id="${product.id}" alt="${product.name}" loading="lazy" style="cursor: pointer;">
+                            
+                            <div class="product-actions-overlay">
+                                <button class="btn-action-icon btn-buy-now" data-id="${product.id}" title="Buy Now">
+                                    <i class="fas fa-credit-card"></i>
+                                </button>
+                                
+                                <button class="btn-action-icon btn-add-cart" data-id="${product.id}" title="Add to Cart">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body text-center p-4">
+                            <small class="text-muted text-uppercase ls-1" style="font-size: 0.7rem;">${product.category}</small>
+                            <h5 class="card-title brand-font mt-2 mb-2">
+                                <a href="#" class="text-dark text-decoration-none hover-gold transition trigger-qv" data-id="${product.id}">${product.name}</a>
+                            </h5>
+                            <div class="text-gold fw-bold h6 mb-0">${priceFormatted}</div>
                         </div>
                     </div>
-                    <div class="card-body text-center p-4">
-                        <small class="text-muted text-uppercase ls-1" style="font-size: 0.7rem;">${product.category}</small>
-                        <h5 class="card-title brand-font mt-2 mb-2">
-                            <a href="product-details.php?id=${product.id}" class="text-dark text-decoration-none hover-gold transition">${product.name}</a>
-                        </h5>
-                        <div class="text-gold fw-bold h6 mb-0">${price}</div>
-                    </div>
-                </div>
-            `;
-            dom.grid.appendChild(col);
-        });
+                `;
+                dom.grid.appendChild(col);
+            });
+            attachEvents();
+        }
+    };
 
-        // E. Attach Events to New Buttons
+    // 4. ATTACH EVENTS (Buttons & Quick View)
+    const attachEvents = () => {
         document.querySelectorAll('.btn-add-cart').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const id = parseInt(e.currentTarget.getAttribute('data-id'));
-                const product = state.products.find(p => p.id === id);
+                const product = allProducts.find(p => p.id === id);
+                if(product && window.App) window.App.addToCart(product);
+            });
+        });
+
+        document.querySelectorAll('.btn-buy-now').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = parseInt(e.currentTarget.getAttribute('data-id'));
+                const product = allProducts.find(p => p.id === id);
                 if(product && window.App) {
-                    window.App.addToCart(product);
+                    window.App.addToCart(product, () => {
+                        window.location.href = 'cart.php';
+                    });
                 }
+            });
+        });
+
+        document.querySelectorAll('.trigger-qv').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                const id = parseInt(e.currentTarget.getAttribute('data-id'));
+                openQuickView(id);
             });
         });
     };
 
-    // 4. EVENT HANDLERS
+    // 5. QUICK VIEW LOGIC (Updated)
+    const openQuickView = (id) => {
+        const product = allProducts.find(p => p.id === id);
+        if(!product) return;
+
+        // 1. Populate Content
+        dom.qv.img.src = product.image.includes('/') ? product.image : `src/images/${product.image}`;
+        dom.qv.name.textContent = product.name;
+        dom.qv.cat.textContent = product.category;
+        dom.qv.price.textContent = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(product.price);
+        dom.qv.desc.textContent = product.description || "Experience the epitome of luxury with this handcrafted piece.";
+
+        // 2. BADGE LOGIC (Fix Overlap)
+        // A. Handle "New Arrival" Badge in Image Area
+        const existingBadge = dom.qv.imgContainer.querySelector('.badge-luxury');
+        if(existingBadge) existingBadge.remove(); // Clean up previous
+
+        if(product.is_new == 1) {
+            const badge = document.createElement('span');
+            badge.className = 'badge-luxury modal-badge';
+            badge.textContent = 'New Arrival';
+            dom.qv.imgContainer.appendChild(badge);
+        }
+
+        // B. Handle "In Stock" Badge in Price Area
+        // You can add logic here if you track stock in DB (e.g., product.stock > 0)
+        // For now, we assume standard stock status
+        dom.qv.card.querySelector('#qvBadge').textContent = 'In Stock'; 
+        dom.qv.card.querySelector('#qvBadge').style.display = 'inline-block';
+
+        // 3. BUTTON LOGIC (Clone to strip old listeners)
+        const newCartBtn = dom.qv.btnCart.cloneNode(true);
+        const newBuyBtn = dom.qv.btnBuy.cloneNode(true);
+        
+        dom.qv.btnCart.parentNode.replaceChild(newCartBtn, dom.qv.btnCart);
+        dom.qv.btnBuy.parentNode.replaceChild(newBuyBtn, dom.qv.btnBuy);
+        
+        dom.qv.btnCart = newCartBtn;
+        dom.qv.btnBuy = newBuyBtn;
+
+        // Attach Click Events
+        dom.qv.btnCart.addEventListener('click', () => {
+            if(window.App) window.App.addToCart(product);
+        });
+
+        dom.qv.btnBuy.addEventListener('click', () => {
+            if(window.App) {
+                window.App.addToCart(product, () => {
+                    window.location.href = 'cart.php';
+                });
+            }
+        });
+
+        // 4. SHOW MODAL
+        dom.qv.overlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; 
+    };
+
+    const closeQuickView = () => {
+        dom.qv.overlay.classList.remove('active');
+        document.body.style.overflow = ''; // Unlock scroll
+    };
+
+    // 6. GENERAL EVENT LISTENERS
     const initEvents = () => {
+        // CLOSE BUTTON LOGIC
+        dom.qv.close.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            closeQuickView();
+        });
+
+        // Close when clicking outside card
+        dom.qv.overlay.addEventListener('click', (e) => {
+            if(e.target === dom.qv.overlay) closeQuickView();
+        });
+
+        // Escape Key to Close
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape' && dom.qv.overlay.classList.contains('active')) {
+                closeQuickView();
+            }
+        });
+
         // Search
         dom.inputs.search.addEventListener('input', (e) => {
-            state.filters.search = e.target.value.toLowerCase();
+            state.filters.search = e.target.value.toLowerCase().trim();
             render();
         });
 
-        // Category Click
+        // Category
         dom.inputs.categoryItems.forEach(item => {
             item.addEventListener('click', function() {
-                // UI Update
                 dom.inputs.categoryItems.forEach(i => {
                     i.classList.remove('active');
-                    const icon = i.querySelector('.fa-check');
-                    if(icon) icon.remove();
+                    if(i.querySelector('.fa-check')) i.querySelector('.fa-check').remove();
                 });
                 this.classList.add('active');
-                this.innerHTML = `<span>${this.innerText}</span> <i class="fas fa-check small"></i>`;
-                
-                // Logic Update
+                this.innerHTML += ` <i class="fas fa-check small"></i>`;
                 state.filters.category = this.getAttribute('data-value');
-                document.getElementById('collectionTitle').textContent = this.innerText + 's';
                 render();
             });
         });
 
-        // Price Slider
+        // Price
         dom.inputs.priceRange.addEventListener('input', function() {
-            // Uncheck presets if using slider
-            document.getElementById('priceAll').checked = true;
             state.filters.minPrice = 0;
             state.filters.maxPrice = parseInt(this.value);
-            
             dom.inputs.priceMaxDisplay.textContent = `₱${parseInt(this.value).toLocaleString()}`;
+            document.getElementById('priceAll').checked = true; 
             render();
         });
 
-        // Price Presets
         dom.inputs.pricePresets.forEach(radio => {
             radio.addEventListener('change', function() {
-                if(this.value === 'all') {
-                    state.filters.minPrice = 0;
-                    state.filters.maxPrice = 10000000;
-                    // Reset Slider Visual
-                    dom.inputs.priceRange.value = 300000;
-                    dom.inputs.priceMaxDisplay.textContent = '₱300,000+';
-                } else {
-                    const [min, max] = this.value.split('-').map(Number);
-                    state.filters.minPrice = min;
-                    state.filters.maxPrice = max;
+                if (this.checked) {
+                    if (this.value === 'all') {
+                        state.filters.minPrice = 0; state.filters.maxPrice = 300000;
+                    } else {
+                        const [min, max] = this.value.split('-').map(Number);
+                        state.filters.minPrice = min; state.filters.maxPrice = max;
+                    }
+                    dom.inputs.priceRange.value = state.filters.maxPrice;
+                    dom.inputs.priceMaxDisplay.textContent = `₱${state.filters.maxPrice.toLocaleString()}`;
+                    render();
                 }
-                render();
             });
         });
 
@@ -190,66 +286,48 @@ const ProductManager = (() => {
             render();
         });
 
-        // APPLY BUTTON (New Logic)
+        // Apply
         dom.inputs.applyBtn.addEventListener('click', () => {
-            // Optional: Scroll to top of grid for better UX
+            render();
             dom.grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            render(); // Trigger the filter logic
         });
 
         // Reset
         dom.inputs.resetBtn.addEventListener('click', () => {
-            // Visual Rotation Effect
-            const icon = dom.inputs.resetBtn.querySelector('i');
-            icon.style.transition = 'transform 0.5s ease';
-            icon.style.transform = 'rotate(-360deg)';
-            setTimeout(() => icon.style.transform = 'none', 500);
-
-            // Reset Data State
-            state.filters = { search: '', category: 'All', minPrice: 0, maxPrice: 300000 };
-            state.sort = 'newest';
-            
-            // Reset UI Elements
+            state = JSON.parse(JSON.stringify(defaultState));
             dom.inputs.search.value = '';
-            dom.inputs.categoryItems.forEach(i => i.classList.remove('active'));
-            dom.inputs.categoryItems[0].classList.add('active'); // Select 'All'
+            dom.inputs.categoryItems.forEach(i => {
+                i.classList.remove('active');
+                if(i.querySelector('.fa-check')) i.querySelector('.fa-check').remove();
+            });
+            const allCat = document.querySelector('.category-item[data-value="All"]');
+            if(allCat) { allCat.classList.add('active'); allCat.innerHTML += ` <i class="fas fa-check small"></i>`; }
             dom.inputs.priceRange.value = 300000;
             dom.inputs.priceMaxDisplay.textContent = '₱300,000+';
-            dom.inputs.sort.value = 'newest';
             document.getElementById('priceAll').checked = true;
-            document.getElementById('collectionTitle').textContent = 'All Collections';
-
+            dom.inputs.sort.value = 'newest';
             render();
         });
-
-        // Sidebar Toggles
-        const toggleSection = (trigger, target, arrow) => {
-            trigger.addEventListener('click', () => {
-                const isHidden = target.classList.contains('d-none');
-                if (isHidden) {
-                    target.classList.remove('d-none');
-                    target.style.opacity = 0;
-                    setTimeout(() => target.style.opacity = 1, 10); // Fade in
-                    arrow.style.transform = 'rotate(180deg)';
-                } else {
-                    target.classList.add('d-none');
-                    arrow.style.transform = 'rotate(0deg)';
-                }
-            });
-        };
-        
-        toggleSection(dom.toggles.cat, dom.toggles.catList, dom.toggles.catArrow);
-        toggleSection(dom.toggles.price, dom.toggles.priceList, dom.toggles.priceArrow);
     };
 
-    // INIT
     return {
         init: () => {
-            initEvents();
-            render();
+            fetch('ajax/get_products.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        dom.grid.innerHTML = `<div class="col-12 text-center text-danger py-5">Error loading products.</div>`;
+                        return;
+                    }
+                    allProducts = data;
+                    initEvents();
+                    render();
+                })
+                .catch(err => {
+                    dom.grid.innerHTML = `<div class="col-12 text-center text-danger py-5">Failed to connect to server.</div>`;
+                });
         }
     };
 })();
 
-// Start Application
 document.addEventListener('DOMContentLoaded', ProductManager.init);

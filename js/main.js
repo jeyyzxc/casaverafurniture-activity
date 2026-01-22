@@ -23,10 +23,10 @@ function showToast(message, type = 'info') {
 const App = {
     /**
      * Add Item to Cart
-     * Called by home.php and products.php
+     * @param {Object} product - Product Object
+     * @param {Function} onSuccess - Optional callback to run after success (e.g., redirect)
      */
-    addToCart: function(product) {
-        // Send request to the PHP backend
+    addToCart: function(product, onSuccess) {
         $.ajax({
             url: 'ajax/add_to_cart.php', 
             method: 'POST',
@@ -34,12 +34,16 @@ const App = {
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    // Success: Update badge and show toast
-                    // This now works for BOTH Logged In users AND Guests
                     $('.badge-cart').text(response.cart_count);
-                    showToast('Item added to cart!', 'success');
+                    
+                    // If a specific success action was passed (like redirecting), run it.
+                    if (onSuccess && typeof onSuccess === 'function') {
+                        onSuccess();
+                    } else {
+                        // Otherwise, just show the toast
+                        showToast('Item added to cart!', 'success');
+                    }
                 } else {
-                    // Generic Error
                     showToast('Error: ' + response.message, 'danger');
                 }
             },
@@ -50,13 +54,12 @@ const App = {
         });
     },
 
-    /**
-     * Initialize App
-     */
     init: function() {
         console.log("CASA VÉRA App Initialized");
     }
 };
+
+document.addEventListener('DOMContentLoaded', App.init);
 
 // Initialize on Document Ready
 document.addEventListener('DOMContentLoaded', App.init);
