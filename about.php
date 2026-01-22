@@ -5,8 +5,8 @@ $page_class = 'about-page';
 include 'includes/header.php'; 
 ?>
 
-<link rel="stylesheet" href="css/slider.css">
-<link rel="stylesheet" href="css/about.css">
+<link rel="stylesheet" href="src/css/slider.css">
+<link rel="stylesheet" href="src/css/about.css">
 
 <?php
     // Configure Hero
@@ -332,4 +332,4 @@ include 'includes/header.php';
 
 <?php include 'includes/footer.php'; ?>
 
-<script src="js/animations.js"></script>
+<script src="src/js/animations.js"></script>

@@ -21,9 +21,10 @@ try {
         $p['is_new'] = ($p['is_new'] == 1); 
 
         // FIX 3: Image Handling
-        // If your DB column is 'image' (as per your schema), keep it.
-        // If it's 'image_url', we map it to 'image' so JS understands it.
-        if (isset($p['image_url']) && !empty($p['image_url'])) {
+        // Map DB column 'images' to JS property 'image'
+        if (!empty($p['images'])) {
+            $p['image'] = $p['images'];
+        } elseif (isset($p['image_url']) && !empty($p['image_url'])) {
              $p['image'] = $p['image_url'];
         }
         // Fallback: Ensure there is always an 'image' property

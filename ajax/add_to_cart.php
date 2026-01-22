@@ -1,69 +1,136 @@
 <?php
-// ajax/add_to_cart.php
-session_start();
+/**
+ * ajax/add_to_cart.php
+ * Handles adding items to cart for both guest and logged-in users
+ */
 require_once '../config.php';
 require_once '../classes/Database.php';
 
 header('Content-Type: application/json');
 
-if (!isset($_POST['product_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Product ID missing']);
-    exit();
+// Parse JSON input
+$input = json_decode(file_get_contents('php://input'), true);
+
+if (!is_array($input)) {
+    echo json_encode(['success' => false, 'message' => 'Invalid request format']);
+    exit;
 }
 
-$productId = (int)$_POST['product_id'];
-$action = $_POST['action'] ?? 'add'; // 'add' or 'buy'
-$cartCount = 0;
+$productId = $input['product_id'] ?? null;
+$quantity = $input['quantity'] ?? 1;
+$action = $input['action'] ?? 'add'; // 'add' or 'buy'
 
-// =========================================================
-// SCENARIO A: LOGGED-IN USER (Database - Always Persistent)
-// =========================================================
-if (isset($_SESSION['user_id'])) {
-    $db = new Database();
-    $userId = $_SESSION['user_id'];
+// Validation
+if (!$productId) {
+    echo json_encode(['success' => false, 'message' => 'Product ID required']);
+    exit;
+}
 
-    // Standard Database Logic (Same as before)
-    $existing = $db->fetchOne("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?", [$userId, $productId]);
-    if ($existing) {
-        $db->query("UPDATE cart SET quantity = quantity + 1 WHERE id = ?", [$existing['id']]);
-    } else {
-        $db->query("INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, 1)", [$userId, $productId]);
+if ($quantity < 1) {
+    echo json_encode(['success' => false, 'message' => 'Invalid quantity']);
+    exit;
+}
+
+$db = new Database();
+$userId = $_SESSION['user_id'] ?? null;
+$isLoggedIn = !empty($userId);
+
+try {
+    // 1. VERIFY PRODUCT EXISTS
+    $product = $db->fetchOne("SELECT id, name, price FROM products WHERE id = ?", [$productId]);
+    if (!$product) {
+        echo json_encode(['success' => false, 'message' => 'Product not found']);
+        exit;
     }
-    $result = $db->fetchOne("SELECT SUM(quantity) as total FROM cart WHERE user_id = ?", [$userId]);
-    $cartCount = $result['total'] ?? 0;
-} 
-// =========================================================
-// SCENARIO B: GUEST USER (Session - Conditional Persistence)
-// =========================================================
-else {
-    // 1. Initialize Standard Cart (Persistent)
-    if (!isset($_SESSION['guest_cart'])) $_SESSION['guest_cart'] = [];
+
+    // 2. DETERMINE CART STORAGE STRATEGY
+    if ($isLoggedIn) {
+        // ═══════════════════════════════════════════════════
+        // LOGGED-IN USER: Store in Database
+        // ═══════════════════════════════════════════════════
+        $existing = $db->fetchOne(
+            "SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?", 
+            [$userId, $productId]
+        );
+
+        if ($existing) {
+            // Update existing cart item
+            $newQty = $existing['quantity'] + $quantity;
+            $db->query(
+                "UPDATE cart SET quantity = ?, updated_at = NOW() WHERE id = ?", 
+                [$newQty, $existing['id']]
+            );
+        } else {
+            // Insert new cart item
+            $db->query(
+                "INSERT INTO cart (user_id, product_id, quantity, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())", 
+                [$userId, $productId, $quantity]
+            );
+        }
+
+        // Get total cart count
+        $count = $db->fetchOne(
+            "SELECT SUM(quantity) as total FROM cart WHERE user_id = ?", 
+            [$userId]
+        );
+        $totalCount = $count['total'] ?? 0;
+
+    } else {
+        // ═══════════════════════════════════════════════════
+        // GUEST USER: Store in Session
+        // ═══════════════════════════════════════════════════
+        
+        // Initialize guest cart if not exists
+        if (!isset($_SESSION['guest_cart'])) {
+            $_SESSION['guest_cart'] = [];
+        }
+
+        // CRITICAL: Separate temporary cart for "Buy Now" actions
+        if ($action === 'buy') {
+            // Store in temporary cart (will be cleared after viewing)
+            if (!isset($_SESSION['guest_temp_cart'])) {
+                $_SESSION['guest_temp_cart'] = [];
+            }
+            
+            if (isset($_SESSION['guest_temp_cart'][$productId])) {
+                $_SESSION['guest_temp_cart'][$productId] += $quantity;
+            } else {
+                $_SESSION['guest_temp_cart'][$productId] = $quantity;
+            }
+        } else {
+            // Normal "Add to Cart" - store in persistent cart
+            if (isset($_SESSION['guest_cart'][$productId])) {
+                $_SESSION['guest_cart'][$productId] += $quantity;
+            } else {
+                $_SESSION['guest_cart'][$productId] = $quantity;
+            }
+        }
+
+        // Calculate total count (persistent + temporary)
+        $persistentCount = array_sum($_SESSION['guest_cart']);
+        $tempCount = array_sum($_SESSION['guest_temp_cart'] ?? []);
+        $totalCount = $persistentCount + $tempCount;
+    }
+
+    // 3. UPDATE SESSION CART COUNT
+    $_SESSION['cart_count'] = $totalCount;
+
+    // 4. RETURN SUCCESS RESPONSE
+    echo json_encode([
+        'success' => true,
+        'cartCount' => $totalCount,
+        'is_logged_in' => $isLoggedIn,
+        'action' => $action,
+        'message' => 'Item added to cart'
+    ]);
+
+} catch (Exception $e) {
+    // Log error for debugging
+    error_log("Add to Cart Error: " . $e->getMessage());
     
-    // 2. Initialize Buy Now Cart (Temporary / Flash)
-    if (!isset($_SESSION['guest_temp_cart'])) $_SESSION['guest_temp_cart'] = [];
-
-    if ($action === 'buy') {
-        // "Buy Now": Add to TEMPORARY storage
-        // We overwrite or add to temp cart. 
-        // Logic: Buy Now usually focuses on this specific item.
-        if (isset($_SESSION['guest_temp_cart'][$productId])) {
-            $_SESSION['guest_temp_cart'][$productId]++;
-        } else {
-            $_SESSION['guest_temp_cart'][$productId] = 1;
-        }
-    } else {
-        // "Add to Cart": Add to PERSISTENT storage
-        if (isset($_SESSION['guest_cart'][$productId])) {
-            $_SESSION['guest_cart'][$productId]++;
-        } else {
-            $_SESSION['guest_cart'][$productId] = 1;
-        }
-    }
-
-    // Count is sum of both for now
-    $cartCount = array_sum($_SESSION['guest_cart']) + array_sum($_SESSION['guest_temp_cart']);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Error: ' . $e->getMessage()
+    ]);
 }
-
-$_SESSION['cart_count'] = $cartCount;
-echo json_encode(['success' => true, 'cart_count' => $cartCount]);
 ?>

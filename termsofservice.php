@@ -5,7 +5,7 @@ $page_class = 'legal-page';
 include('includes/header.php'); 
 ?>
 
-<link rel="stylesheet" href="css/slider.css">
+<link rel="stylesheet" href="src/css/slider.css">
 
 <?php
     $hero_title = "Terms of Service";

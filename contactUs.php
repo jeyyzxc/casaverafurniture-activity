@@ -7,8 +7,8 @@ $page_class = 'contact-page';
 include 'includes/header.php'; 
 ?>
 
-<link rel="stylesheet" href="css/slider.css">
-<link rel="stylesheet" href="css/contact.css">
+<link rel="stylesheet" href="src/css/slider.css">
+<link rel="stylesheet" href="src/css/contact.css">
 
 <style>
     .contact-info-card {
@@ -164,5 +164,5 @@ include 'includes/header.php';
 
 <?php include 'includes/footer.php'; ?>
 
-<script src="js/animations.js"></script>
-<script src="js/contact.js"></script>
+<script src="src/js/animations.js"></script>
+<script src="src/js/contact.js"></script>

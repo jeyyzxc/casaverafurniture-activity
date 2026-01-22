@@ -6,8 +6,8 @@ $page_class = 'cart-page';
 include 'includes/header.php'; 
 ?>
 
-<link rel="stylesheet" href="css/slider.css">
-<link rel="stylesheet" href="css/cart.css">
+<link rel="stylesheet" href="src/css/slider.css">
+<link rel="stylesheet" href="src/css/cart.css">
 
 <?php
     $hero_title = "Shopping Cart";
@@ -76,5 +76,5 @@ include 'includes/header.php';
 
 <?php include 'includes/footer.php'; ?>
 
-<script src="js/animations.js"></script>
-<script src="js/cart.js"></script>
+<script src="src/js/animations.js"></script>
+<script src="src/js/cart.js"></script>

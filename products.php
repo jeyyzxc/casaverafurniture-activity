@@ -4,8 +4,8 @@ $page_title = 'Our Collection | CASA VÉRA Furniture';
 include 'includes/header.php'; 
 ?>
 
-<link rel="stylesheet" href="css/slider.css">
-<link rel="stylesheet" href="css/products.css">
+<link rel="stylesheet" href="src/css/slider.css">
+<link rel="stylesheet" href="src/css/products.css">
 
 <?php
     $hero_title = "The Collection";
@@ -142,5 +142,5 @@ include 'includes/header.php';
 </div>
 
 <?php include 'includes/footer.php'; ?>
-<script src="js/products.js"></script>
-<script src="js/animations.js"></script>
+<script src="src/js/products.js"></script>
+<script src="src/js/animations.js"></script>

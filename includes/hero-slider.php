@@ -12,11 +12,11 @@
 
 // 1. Defaults (Home Page Configuration)
 $images = isset($hero_images) ? $hero_images : [
-    'images/f1.jpg',
-    'images/f2.jpg',
-    'images/f3.jpg',
-    'images/f4.jpg',
-    'images/f5.jpg'
+    'src/images/f1.jpg',
+    'src/images/f2.jpg',
+    'src/images/f3.jpg',
+    'src/images/f4.jpg',
+    'src/images/f5.jpg'
 ];
 
 $title = isset($hero_title) ? $hero_title : 'Timeless Elegance';

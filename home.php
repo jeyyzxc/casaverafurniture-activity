@@ -1,12 +1,13 @@
 <?php 
 require_once 'config.php'; // 1. Start Session & DB Connection
+require_once 'classes/Database.php';
 $page_title = 'CASA VÉRA - Timeless Furniture'; 
 $page_class = 'home-page'; 
 include 'includes/header.php'; 
 ?>
 
-<link rel="stylesheet" href="css/slider.css">
-<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="src/css/slider.css">
+<link rel="stylesheet" href="src/css/home.css">
 
 <?php
     $hero_btn_text = "Explore Collection";
@@ -26,42 +27,42 @@ include 'includes/header.php';
         <div class="film-track" id="filmTrack">
             <div class="film-card">
                 <a href="products.php" class="film-link" aria-label="View Oak Sideboard">
-                    <div class="film-img-box"><img src="images/sideboard.jpg" alt="Oak Sideboard"></div>
+                    <div class="film-img-box"><img src="src/images/sideboard1.jpg" alt="Oak Sideboard"></div>
                 </a>
                 <div class="film-details"><h4>Oak Sideboard</h4><p>₱5,999.00</p></div>
             </div>
             
             <div class="film-card">
                 <a href="products.php" class="film-link" aria-label="View Velvet Armchair">
-                    <div class="film-img-box"><img src="images/velvetarmchair.jpg" alt="Velvet Armchair"></div>
+                    <div class="film-img-box"><img src="src/images/velvetarmchair.jpg" alt="Velvet Armchair"></div>
                 </a>
                 <div class="film-details"><h4>Velvet Armchair</h4><p>₱6,599.00</p></div>
             </div>
 
             <div class="film-card">
                 <a href="products.php" class="film-link" aria-label="View Marble Dining Table">
-                    <div class="film-img-box"><img src="images/marbledining.jpg" alt="Marble Dining Table"></div>
+                    <div class="film-img-box"><img src="src/images/marbledining.jpg" alt="Marble Dining Table"></div>
                 </a>
                 <div class="film-details"><h4>Marble Dining Table</h4><p>₱24,500.00</p></div>
             </div>
 
             <div class="film-card">
                 <a href="products.php" class="film-link" aria-label="View Royal Bedframe">
-                    <div class="film-img-box"><img src="images/royalbedframe.jpg" alt="Royal Bedframe"></div>
+                    <div class="film-img-box"><img src="src/images/royalbedframe.jpg" alt="Royal Bedframe"></div>
                 </a>
                 <div class="film-details"><h4>Royal Bedframe</h4><p>₱35,999.00</p></div>
             </div>
 
             <div class="film-card">
                 <a href="products.php" class="film-link" aria-label="View Lounge Sofa">
-                    <div class="film-img-box"><img src="images/loungesofa.jpg" alt="Lounge Sofa"></div>
+                    <div class="film-img-box"><img src="src/images/loungesofa.jpg" alt="Lounge Sofa"></div>
                 </a>
                 <div class="film-details"><h4>Lounge Sofa</h4><p>₱27,599.00</p></div>
             </div>
 
             <div class="film-card">
                 <a href="products.php" class="film-link" aria-label="View Artisan Lamp">
-                    <div class="film-img-box"><img src="images/artisanlamp.jpg" alt="Artisan Lamp"></div>
+                    <div class="film-img-box"><img src="src/images/artisanlamp.jpg" alt="Artisan Lamp"></div>
                 </a>
                 <div class="film-details"><h4>Artisan Lamp</h4><p>₱15,500.00</p></div>
             </div>
@@ -77,73 +78,39 @@ include 'includes/header.php';
         </div>
 
         <div class="row g-4">
+            <?php
+            $db = new Database();
+            // Fetch 4 products for the signature collection
+            $products = $db->fetchAll("SELECT * FROM products LIMIT 4");
             
-            <div class="col-md-6 col-lg-3">
-                <div class="product-card">
-                    <div class="product-img-wrap">
-                        <a href="products.php" class="product-link">
-                            <img src="images/velvetlounge.jpg" class="img-fluid" alt="Velvet Lounge Chair">
-                            <span class="badge badge-vibrant">Best Seller</span>
-                        </a>
-                    </div>
-                    <div class="product-info mt-3 text-center">
-                        <h5 class="product-title brand-font">Velvet Lounge Chair</h5>
-                        <p class="product-price">₱6,599.00</p>
-                        <button class="btn btn-outline-dark btn-sm rounded-pill px-4 btn-action-home" 
-                                data-id="1" data-action="add">Add to Cart</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-lg-3">
-                <div class="product-card">
-                    <div class="product-img-wrap">
-                        <a href="products.php" class="product-link">
-                            <img src="images/minimalisttable.jpg" class="img-fluid" alt="Minimalist Table">
-                            <span class="badge badge-sold">Sold</span>
-                        </a>
-                    </div>
-                    <div class="product-info mt-3 text-center">
-                        <h5 class="product-title brand-font">Minimalist Table</h5>
-                        <p class="product-price">₱9,999.00</p>
-                        <button class="btn btn-secondary btn-sm rounded-pill px-4" disabled>Out of Stock</button>
+            foreach ($products as $index => $product): 
+                // Fix image path logic: Map 'images' column and handle path
+                $imgVal = !empty($product['images']) ? $product['images'] : 'placeholder.jpg';
+                
+                // If path doesn't contain '/', prepend 'src/images/'
+                $imagePath = (strpos($imgVal, '/') === false) 
+                    ? 'src/images/' . $imgVal 
+                    : $imgVal;
+            ?>
+                <div class="col-md-6 col-lg-3">
+                    <div class="product-card position-relative">
+                        <?php if ($index < 2): ?>
+                            <span class="position-absolute top-0 start-0 m-3 badge text-white text-uppercase ls-1" style="background-color: #FFD61F; z-index: 10; font-size: 0.7rem; padding: 0.6em 1.2em; border-radius: 3;">Best Seller</span>
+                        <?php endif; ?>
+                        <div class="product-img-wrap">
+                            <a href="products.php" class="product-link">
+                                <img src="<?php echo htmlspecialchars($imagePath); ?>" class="img-fluid" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                            </a>
+                        </div>
+                        <div class="product-info mt-3 text-center">
+                            <h5 class="product-title brand-font"><?php echo htmlspecialchars($product['name']); ?></h5>
+                            <p class="product-price">₱<?php echo number_format($product['price'], 2); ?></p>
+                            <button class="btn btn-outline-dark btn-sm rounded-pill px-4 btn-action-home" 
+                                    data-id="<?php echo $product['id']; ?>" data-action="add">Add to Cart</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-md-6 col-lg-3">
-                <div class="product-card">
-                    <div class="product-img-wrap">
-                        <a href="products.php" class="product-link">
-                            <img src="images/cloudsofa.jpg" class="img-fluid" alt="Cloud Sofa">
-                            <span class="badge bg-gold">New</span>
-                        </a>
-                    </div>
-                    <div class="product-info mt-3 text-center">
-                        <h5 class="product-title brand-font">Cloud Sofa</h5>
-                        <p class="product-price">₱12,500.00</p>
-                        <button class="btn btn-outline-dark btn-sm rounded-pill px-4 btn-action-home" 
-                                data-id="3" data-action="add">Add to Cart</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-lg-3">
-                <div class="product-card">
-                    <div class="product-img-wrap">
-                        <a href="products.php" class="product-link">
-                            <img src="images/tablelamp.jpg" class="img-fluid" alt="Table Lamp">
-                            <span class="badge badge-sold">Sold</span>
-                        </a>
-                    </div>
-                    <div class="product-info mt-3 text-center">
-                        <h5 class="product-title brand-font">Table Lamp</h5>
-                        <p class="product-price">₱6,799.00</p>
-                        <button class="btn btn-secondary btn-sm rounded-pill px-4" disabled>Out of Stock</button>
-                    </div>
-                </div>
-            </div>
-
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
@@ -165,7 +132,7 @@ include 'includes/header.php';
         <div class="row g-4">
             <div class="col-lg-8">
                 <a href="products.php?cat=living" class="category-card large">
-                    <div class="category-img" style="background-image: url('images/livingroom.jpg');"></div>
+                    <div class="category-img" style="background-image: url('src/images/livingroom.jpg');"></div>
                     <div class="category-overlay">
                         <div class="category-content">
                             <span class="category-subtitle">Gather & Relax</span>
@@ -176,7 +143,7 @@ include 'includes/header.php';
             </div>
             <div class="col-lg-4">
                 <a href="products.php?cat=dining" class="category-card">
-                    <div class="category-img" style="background-image: url('images/housedining.jpg');"></div>
+                    <div class="category-img" style="background-image: url('src/images/housedining.jpg');"></div>
                     <div class="category-overlay">
                         <div class="category-content">
                             <span class="category-subtitle">Feast in Style</span>
@@ -187,7 +154,7 @@ include 'includes/header.php';
             </div>
             <div class="col-lg-4">
                 <a href="products.php?cat=bedroom" class="category-card">
-                    <div class="category-img" style="background-image: url('images/bedroom.jpg');"></div>
+                    <div class="category-img" style="background-image: url('src/images/bedroom.jpg');"></div>
                     <div class="category-overlay">
                         <div class="category-content">
                             <span class="category-subtitle">Dream & Rest</span>
@@ -198,7 +165,7 @@ include 'includes/header.php';
             </div>
             <div class="col-lg-8">
                 <a href="products.php?cat=office" class="category-card large">
-                    <div class="category-img" style="background-image: url('images/officedecor.jpg');"></div>
+                    <div class="category-img" style="background-image: url('src/images/officedecor.jpg');"></div>
                     <div class="category-overlay">
                         <div class="category-content">
                             <span class="category-subtitle">Work & Inspire</span>
@@ -212,6 +179,17 @@ include 'includes/header.php';
 </section>
 
 <?php include 'includes/footer.php'; ?>
-<script src="js/animations.js"></script>
-<script src="js/home.js"></script>
-<script src="js/main.js"></script>
+<script src="src/js/animations.js"></script>
+<script src="src/js/home.js"></script>
+<script>
+    // Fix: Ensure Add to Cart works on Home Page
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.btn-action-home').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = this.getAttribute('data-id');
+                if(window.App) window.App.addToCart({ id: id }, 'add', null);
+            });
+        });
+    });
+</script>

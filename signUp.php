@@ -1,3 +1,72 @@
+<?php
+require_once 'config.php';
+require_once 'classes/Database.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $firstname = htmlspecialchars(trim($_POST['firstname']));
+    $lastname  = htmlspecialchars(trim($_POST['lastname']));
+    $email     = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
+    $password  = $_POST['password'];
+    $confirm   = $_POST['confirm_password'];
+
+    $errors = [];
+
+    // 1. Strict Validation Rules
+    if (empty($firstname) || empty($lastname) || empty($email) || empty($password) || empty($confirm)) {
+        $errors[] = "All fields are required.";
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Invalid email format.";
+    }
+    if (strlen($password) < 8) {
+        $errors[] = "Password must be at least 8 characters.";
+    }
+    if ($password !== $confirm) {
+        $errors[] = "Passwords do not match.";
+    }
+
+    // 2. Database Verification (1 is to 1 check)
+    if (empty($errors)) {
+        $db = new Database();
+        
+        // Check if account already exists (Strict)
+        $existing = $db->fetchOne("SELECT id FROM users WHERE email = ?", [$email]);
+        
+        if ($existing) {
+            $errors[] = "An account with this email already exists.";
+        } else {
+            // Create Account
+            $hashedPass = password_hash($password, PASSWORD_DEFAULT);
+            
+            try {
+                $db->query(
+                    "INSERT INTO users (firstname, lastname, email, password) VALUES (?, ?, ?, ?)", 
+                    [$firstname, $lastname, $email, $hashedPass]
+                );
+                
+                // Auto-Login
+                session_regenerate_id(true);
+                $_SESSION['user_id'] = $db->lastInsertId();
+                $_SESSION['user_firstname'] = $firstname;
+                $_SESSION['user_lastname'] = $lastname;
+
+                header("Location: home.php?success=Account created successfully");
+                exit();
+
+            } catch (Exception $e) {
+                $errors[] = "System error: " . $e->getMessage();
+            }
+        }
+    }
+
+    // Return with Errors
+    if (!empty($errors)) {
+        $errorString = urlencode(implode(' ', $errors));
+        header("Location: home.php?error=$errorString&action=signup");
+        exit();
+    }
+}
+?>
 <div id="signupModal" class="cv-modal-overlay">
     <div class="cv-modal-box">
         <button class="cv-modal-close" onclick="closeSignupModal()"><i class="fas fa-times"></i></button>
@@ -7,7 +76,7 @@
             <p class="text-muted small">Join the CASA VÉRA community.</p>
         </div>
 
-        <form id="signupForm" action="process_signup.php" method="POST" class="needs-validation" novalidate>
+        <form id="signupForm" action="signup.php" method="POST" class="needs-validation" novalidate>
             <div class="row g-2 mb-3">
                 <div class="col-6">
                     <div class="form-floating">
