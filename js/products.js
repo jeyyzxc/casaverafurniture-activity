@@ -5,7 +5,7 @@
 
 /**
  * products.js
- * Handles product rendering, filtering, sorting, and QUICK VIEW logic.
+ * Handles product rendering, filtering, sorting, and Quick View.
  */
 
 const ProductManager = (() => {
@@ -35,12 +35,11 @@ const ProductManager = (() => {
             resetBtn: document.getElementById('resetFiltersIcon'),
             applyBtn: document.getElementById('applyFiltersBtn')
         },
-        // Quick View Elements
         qv: {
             overlay: document.getElementById('quickViewOverlay'),
             card: document.getElementById('quickViewCard'),
             close: document.getElementById('closeQuickView'),
-            imgContainer: document.querySelector('.qv-image-col'), // Required for badge injection
+            imgContainer: document.querySelector('.qv-image-col'),
             img: document.getElementById('qvImage'),
             name: document.getElementById('qvName'),
             cat: document.getElementById('qvCategory'),
@@ -91,16 +90,14 @@ const ProductManager = (() => {
                 col.innerHTML = `
                     <div class="card h-100 border-0 shadow-sm product-card overflow-hidden">
                         <div class="product-img-wrapper">
-                            ${badge}
+                            ${badge} 
                             <img src="${imagePath}" class="product-img trigger-qv" data-id="${product.id}" alt="${product.name}" loading="lazy" style="cursor: pointer;">
-                            
                             <div class="product-actions-overlay">
                                 <button class="btn-action-icon btn-buy-now" data-id="${product.id}" title="Buy Now">
-                                    <i class="fas fa-credit-card"></i>
+                                    <i class="fa-solid fa-bag-shopping"></i>
                                 </button>
-                                
                                 <button class="btn-action-icon btn-add-cart" data-id="${product.id}" title="Add to Cart">
-                                    <i class="fas fa-shopping-bag"></i>
+                                    <i class="fa-solid fa-cart-arrow-down"></i>
                                 </button>
                             </div>
                         </div>
@@ -119,20 +116,20 @@ const ProductManager = (() => {
         }
     };
 
-    // 4. ATTACH EVENTS (Buttons & Quick View)
+    // 4. ATTACH EVENTS
     const attachEvents = () => {
         document.querySelectorAll('.btn-add-cart').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                e.stopPropagation();
+                e.preventDefault(); e.stopPropagation();
                 const id = parseInt(e.currentTarget.getAttribute('data-id'));
                 const product = allProducts.find(p => p.id === id);
-                if(product && window.App) window.App.addToCart(product);
+                if(product && window.App) window.App.addToCart(product); 
             });
         });
 
         document.querySelectorAll('.btn-buy-now').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                e.stopPropagation();
+                e.preventDefault(); e.stopPropagation();
                 const id = parseInt(e.currentTarget.getAttribute('data-id'));
                 const product = allProducts.find(p => p.id === id);
                 if(product && window.App) {
@@ -152,127 +149,62 @@ const ProductManager = (() => {
         });
     };
 
-    // 5. QUICK VIEW LOGIC (Updated)
+    // 5. QUICK VIEW LOGIC
     const openQuickView = (id) => {
         const product = allProducts.find(p => p.id === id);
         if(!product) return;
 
-        // 1. Populate Content
         dom.qv.img.src = product.image.includes('/') ? product.image : `src/images/${product.image}`;
         dom.qv.name.textContent = product.name;
         dom.qv.cat.textContent = product.category;
         dom.qv.price.textContent = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(product.price);
         dom.qv.desc.textContent = product.description || "Experience the epitome of luxury with this handcrafted piece.";
 
-        // 2. BADGE LOGIC (Fix Overlap)
-        // A. Handle "New Arrival" Badge in Image Area
         const existingBadge = dom.qv.imgContainer.querySelector('.badge-luxury');
-        if(existingBadge) existingBadge.remove(); // Clean up previous
+        if(existingBadge) existingBadge.remove();
 
-        if(product.is_new == 1) {
-            const badge = document.createElement('span');
-            badge.className = 'badge-luxury modal-badge';
-            badge.textContent = 'New Arrival';
-            dom.qv.imgContainer.appendChild(badge);
-        }
-
-        // B. Handle "In Stock" Badge in Price Area
-        // You can add logic here if you track stock in DB (e.g., product.stock > 0)
-        // For now, we assume standard stock status
-        dom.qv.card.querySelector('#qvBadge').textContent = 'In Stock'; 
-        dom.qv.card.querySelector('#qvBadge').style.display = 'inline-block';
-
-        // 3. BUTTON LOGIC (Clone to strip old listeners)
         const newCartBtn = dom.qv.btnCart.cloneNode(true);
         const newBuyBtn = dom.qv.btnBuy.cloneNode(true);
-        
         dom.qv.btnCart.parentNode.replaceChild(newCartBtn, dom.qv.btnCart);
         dom.qv.btnBuy.parentNode.replaceChild(newBuyBtn, dom.qv.btnBuy);
-        
         dom.qv.btnCart = newCartBtn;
         dom.qv.btnBuy = newBuyBtn;
 
-        // Attach Click Events
-        dom.qv.btnCart.addEventListener('click', () => {
-            if(window.App) window.App.addToCart(product);
-        });
+        dom.qv.btnCart.addEventListener('click', () => { if(window.App) window.App.addToCart(product); });
+        dom.qv.btnBuy.addEventListener('click', () => { if(window.App) window.App.addToCart(product, () => { window.location.href = 'cart.php'; }); });
 
-        dom.qv.btnBuy.addEventListener('click', () => {
-            if(window.App) {
-                window.App.addToCart(product, () => {
-                    window.location.href = 'cart.php';
-                });
-            }
-        });
-
-        // 4. SHOW MODAL
         dom.qv.overlay.classList.add('active');
-        document.body.style.overflow = 'hidden'; 
+        document.body.style.overflow = 'hidden';
     };
 
     const closeQuickView = () => {
         dom.qv.overlay.classList.remove('active');
-        document.body.style.overflow = ''; // Unlock scroll
+        document.body.style.overflow = '';
     };
 
-    // 6. GENERAL EVENT LISTENERS
+    // 6. INITIALIZE EVENTS
     const initEvents = () => {
-        // CLOSE BUTTON LOGIC
-        dom.qv.close.addEventListener('click', (e) => {
-            e.preventDefault(); 
-            closeQuickView();
-        });
-
-        // Close when clicking outside card
-        dom.qv.overlay.addEventListener('click', (e) => {
-            if(e.target === dom.qv.overlay) closeQuickView();
-        });
-
-        // Escape Key to Close
-        document.addEventListener('keydown', (e) => {
-            if(e.key === 'Escape' && dom.qv.overlay.classList.contains('active')) {
-                closeQuickView();
-            }
-        });
-
-        // Search
-        dom.inputs.search.addEventListener('input', (e) => {
-            state.filters.search = e.target.value.toLowerCase().trim();
-            render();
-        });
-
-        // Category
+        dom.inputs.search.addEventListener('input', (e) => { state.filters.search = e.target.value.toLowerCase().trim(); render(); });
+        
         dom.inputs.categoryItems.forEach(item => {
             item.addEventListener('click', function() {
-                dom.inputs.categoryItems.forEach(i => {
-                    i.classList.remove('active');
-                    if(i.querySelector('.fa-check')) i.querySelector('.fa-check').remove();
-                });
-                this.classList.add('active');
-                this.innerHTML += ` <i class="fas fa-check small"></i>`;
-                state.filters.category = this.getAttribute('data-value');
-                render();
+                dom.inputs.categoryItems.forEach(i => { i.classList.remove('active'); if(i.querySelector('.fa-check')) i.querySelector('.fa-check').remove(); });
+                this.classList.add('active'); this.innerHTML += ` <i class="fas fa-check small"></i>`;
+                state.filters.category = this.getAttribute('data-value'); render();
             });
         });
 
-        // Price
         dom.inputs.priceRange.addEventListener('input', function() {
-            state.filters.minPrice = 0;
-            state.filters.maxPrice = parseInt(this.value);
+            state.filters.minPrice = 0; state.filters.maxPrice = parseInt(this.value);
             dom.inputs.priceMaxDisplay.textContent = `₱${parseInt(this.value).toLocaleString()}`;
-            document.getElementById('priceAll').checked = true; 
-            render();
+            document.getElementById('priceAll').checked = true; render();
         });
 
         dom.inputs.pricePresets.forEach(radio => {
             radio.addEventListener('change', function() {
                 if (this.checked) {
-                    if (this.value === 'all') {
-                        state.filters.minPrice = 0; state.filters.maxPrice = 300000;
-                    } else {
-                        const [min, max] = this.value.split('-').map(Number);
-                        state.filters.minPrice = min; state.filters.maxPrice = max;
-                    }
+                    if (this.value === 'all') { state.filters.minPrice = 0; state.filters.maxPrice = 300000; } 
+                    else { const [min, max] = this.value.split('-').map(Number); state.filters.minPrice = min; state.filters.maxPrice = max; }
                     dom.inputs.priceRange.value = state.filters.maxPrice;
                     dom.inputs.priceMaxDisplay.textContent = `₱${state.filters.maxPrice.toLocaleString()}`;
                     render();
@@ -280,34 +212,44 @@ const ProductManager = (() => {
             });
         });
 
-        // Sort
-        dom.inputs.sort.addEventListener('change', (e) => {
-            state.sort = e.target.value;
-            render();
-        });
+        dom.inputs.sort.addEventListener('change', (e) => { state.sort = e.target.value; render(); });
+        
+        dom.inputs.applyBtn.addEventListener('click', () => { render(); dom.grid.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 
-        // Apply
-        dom.inputs.applyBtn.addEventListener('click', () => {
-            render();
-            dom.grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-
-        // Reset
         dom.inputs.resetBtn.addEventListener('click', () => {
             state = JSON.parse(JSON.stringify(defaultState));
             dom.inputs.search.value = '';
-            dom.inputs.categoryItems.forEach(i => {
-                i.classList.remove('active');
-                if(i.querySelector('.fa-check')) i.querySelector('.fa-check').remove();
-            });
+            dom.inputs.categoryItems.forEach(i => { i.classList.remove('active'); if(i.querySelector('.fa-check')) i.querySelector('.fa-check').remove(); });
             const allCat = document.querySelector('.category-item[data-value="All"]');
             if(allCat) { allCat.classList.add('active'); allCat.innerHTML += ` <i class="fas fa-check small"></i>`; }
-            dom.inputs.priceRange.value = 300000;
-            dom.inputs.priceMaxDisplay.textContent = '₱300,000+';
-            document.getElementById('priceAll').checked = true;
-            dom.inputs.sort.value = 'newest';
+            dom.inputs.priceRange.value = 300000; dom.inputs.priceMaxDisplay.textContent = '₱300,000+';
+            document.getElementById('priceAll').checked = true; dom.inputs.sort.value = 'newest';
             render();
         });
+
+        dom.qv.close.addEventListener('click', closeQuickView);
+        dom.qv.overlay.addEventListener('click', (e) => { if(e.target === dom.qv.overlay) closeQuickView(); });
+        document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeQuickView(); });
+
+        // I. FILTER TOGGLE LOGIC (New Addition)
+        const toggleFilter = (toggleId, listId, arrowId) => {
+            const toggle = document.getElementById(toggleId);
+            const list = document.getElementById(listId);
+            const arrow = document.getElementById(arrowId);
+            
+            if(toggle && list && arrow) {
+                toggle.addEventListener('click', () => {
+                    list.classList.toggle('d-none');
+                    // Rotate arrow: 0deg is down (open), -90deg is side (closed)
+                    arrow.style.transform = list.classList.contains('d-none') 
+                        ? 'rotate(-90deg)' 
+                        : 'rotate(0deg)';
+                });
+            }
+        };
+
+        toggleFilter('categoryToggle', 'categoryList', 'categoryArrow');
+        toggleFilter('priceToggle', 'priceList', 'priceArrow');
     };
 
     return {
@@ -315,17 +257,10 @@ const ProductManager = (() => {
             fetch('ajax/get_products.php')
                 .then(response => response.json())
                 .then(data => {
-                    if (data.error) {
-                        dom.grid.innerHTML = `<div class="col-12 text-center text-danger py-5">Error loading products.</div>`;
-                        return;
-                    }
-                    allProducts = data;
-                    initEvents();
-                    render();
+                    if (data.error) { dom.grid.innerHTML = `<div class="col-12 text-center text-danger py-5">Error loading products.</div>`; return; }
+                    allProducts = data; initEvents(); render();
                 })
-                .catch(err => {
-                    dom.grid.innerHTML = `<div class="col-12 text-center text-danger py-5">Failed to connect to server.</div>`;
-                });
+                .catch(err => { dom.grid.innerHTML = `<div class="col-12 text-center text-danger py-5">Failed to connect to server.</div>`; });
         }
     };
 })();

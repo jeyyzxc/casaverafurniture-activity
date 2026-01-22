@@ -130,10 +130,10 @@ include 'includes/header.php';
             
             <div class="qv-buttons">
                 <button class="qv-btn qv-btn-cart btn-add-cart-qv">
-                    <i class="fas fa-shopping-bag me-2"></i> Add Cart
+                     Add to Cart
                 </button>
                 <button class="qv-btn qv-btn-buy btn-buy-now-qv">
-                    <i class="fas fa-check me-2"></i> Buy Now
+                     Buy Now
                 </button>
             </div>
         </div>
