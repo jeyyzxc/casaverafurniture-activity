@@ -27,6 +27,12 @@ try {
         } elseif (isset($p['image_url']) && !empty($p['image_url'])) {
              $p['image'] = $p['image_url'];
         }
+
+        // Ensure path has directory
+        if (isset($p['image']) && strpos($p['image'], '/') === false) {
+            $p['image'] = 'src/images/' . $p['image'];
+        }
+
         // Fallback: Ensure there is always an 'image' property
         if (!isset($p['image'])) {
             $p['image'] = 'src/images/placeholder.jpg';

@@ -18,7 +18,7 @@ include 'includes/header.php';
 
 <section class="section-padding bg-light-texture">
     <div class="container py-4">
-        <div class="row g-5">
+        <div class="row g-5" id="cartMainContent">
 
             <div class="col-lg-8">
                 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-light pb-2">
@@ -62,17 +62,78 @@ include 'includes/header.php';
                             <span class="h4 mb-0 brand-font text-gradient-gold" id="summaryTotal">₱0.00</span>
                         </div>
 
-                        <button class="btn-checkout w-100 rounded-pill py-3 mb-3 position-relative overflow-hidden">
+                        <button id="btnCheckout" class="btn-checkout w-100 rounded-pill py-3 mb-3 position-relative overflow-hidden">
                             <span class="position-relative z-2 fw-bold text-uppercase ls-2">Proceed to Checkout</span>
                             <div class="btn-shimmer"></div>
                         </button>
                     </div>
                 </div>
             </div>
+        </div>
 
+        <!-- Order Success Message (Hidden by default) -->
+        <div id="orderSuccess" class="text-center py-5 d-none fade-in-up">
+            <div class="mb-4 text-gold">
+                <i class="fas fa-check-circle fa-5x mb-3"></i>
+            </div>
+            <h2 class="brand-font display-5 mb-3">Payment Successful!</h2>
+            <p class="lead text-muted mb-4">Thank you for your purchase. Your order has been confirmed.</p>
+            
+            <div class="card border-0 shadow-sm d-inline-block mx-auto text-start p-4" style="max-width: 500px; width: 100%;">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Order Reference:</span>
+                    <span class="fw-bold text-dark" id="successOrderId">#CV-000000</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Date:</span>
+                    <span class="fw-bold text-dark" id="successDate">Oct 24, 2023</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Payment Method:</span>
+                    <span class="fw-bold text-dark" id="successPaymentMethod">PayPal</span>
+                </div>
+                <hr class="my-3">
+                <p class="mb-0 text-center small text-muted">
+                    <i class="fas fa-shipping-fast me-2 text-gold"></i>
+                    Estimated Delivery: 3-5 Business Days
+                </p>
+            </div>
+            <div class="mt-5">
+                <a href="products.php" class="btn btn-dark rounded-pill px-5 py-2">Continue Shopping</a>
+            </div>
         </div>
     </div>
 </section>
+
+<!-- Mock Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title brand-font">Secure Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted mb-4 small">Select a payment method to complete your order.</p>
+                <div class="d-grid gap-3">
+                    <button class="btn btn-outline-dark py-3 d-flex align-items-center justify-content-center gap-2 payment-option" data-method="paypal">
+                        <i class="fab fa-paypal fa-lg text-primary"></i> Pay with PayPal
+                    </button>
+                    <button class="btn btn-outline-dark py-3 d-flex align-items-center justify-content-center gap-2 payment-option" data-method="card">
+                        <i class="far fa-credit-card fa-lg"></i> Credit / Debit Card
+                    </button>
+                </div>
+                <div id="paymentProcessing" class="text-center mt-4 d-none">
+                    <div class="spinner-border text-gold mb-2" role="status"></div>
+                    <p class="text-muted small mb-0">Processing transaction...</p>
+                </div>
+                <div id="paymentError" class="alert alert-danger mt-3 d-none small">
+                    <i class="fas fa-exclamation-circle me-1"></i> Transaction failed. Please try again.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <?php include 'includes/footer.php'; ?>
 

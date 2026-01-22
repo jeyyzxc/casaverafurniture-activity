@@ -57,13 +57,13 @@ try {
             // Update existing cart item
             $newQty = $existing['quantity'] + $quantity;
             $db->query(
-                "UPDATE cart SET quantity = ?, updated_at = NOW() WHERE id = ?", 
+                "UPDATE cart SET quantity = ? WHERE id = ?", 
                 [$newQty, $existing['id']]
             );
         } else {
             // Insert new cart item
             $db->query(
-                "INSERT INTO cart (user_id, product_id, quantity, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())", 
+                "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)", 
                 [$userId, $productId, $quantity]
             );
         }
@@ -85,31 +85,16 @@ try {
             $_SESSION['guest_cart'] = [];
         }
 
-        // CRITICAL: Separate temporary cart for "Buy Now" actions
-        if ($action === 'buy') {
-            // Store in temporary cart (will be cleared after viewing)
-            if (!isset($_SESSION['guest_temp_cart'])) {
-                $_SESSION['guest_temp_cart'] = [];
-            }
-            
-            if (isset($_SESSION['guest_temp_cart'][$productId])) {
-                $_SESSION['guest_temp_cart'][$productId] += $quantity;
-            } else {
-                $_SESSION['guest_temp_cart'][$productId] = $quantity;
-            }
+        // Store in persistent cart for both 'add' and 'buy' actions
+        // This ensures items persist after the "Buy Now" -> Login redirect
+        if (isset($_SESSION['guest_cart'][$productId])) {
+            $_SESSION['guest_cart'][$productId] += $quantity;
         } else {
-            // Normal "Add to Cart" - store in persistent cart
-            if (isset($_SESSION['guest_cart'][$productId])) {
-                $_SESSION['guest_cart'][$productId] += $quantity;
-            } else {
-                $_SESSION['guest_cart'][$productId] = $quantity;
-            }
+            $_SESSION['guest_cart'][$productId] = $quantity;
         }
 
         // Calculate total count (persistent + temporary)
-        $persistentCount = array_sum($_SESSION['guest_cart']);
-        $tempCount = array_sum($_SESSION['guest_temp_cart'] ?? []);
-        $totalCount = $persistentCount + $tempCount;
+        $totalCount = array_sum($_SESSION['guest_cart']);
     }
 
     // 3. UPDATE SESSION CART COUNT

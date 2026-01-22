@@ -132,7 +132,7 @@ include 'includes/header.php';
                 <button class="qv-btn qv-btn-cart btn-add-cart-qv">
                      Add to Cart
                 </button>
-                <button class="qv-btn qv-btn-buy btn-buy-now-qv">
+                <button class="qv-btn qv-btn-buy btn-buy-now-qv text-dark">
                      Buy Now
                 </button>
             </div>

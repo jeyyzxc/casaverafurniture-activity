@@ -3,7 +3,7 @@
  * Global cart management bridge between UI and backend
  */
 
-const App = {
+window.App = {
     /**
      * Add item to cart
      * @param {Object} product - Product object with id
@@ -36,8 +36,8 @@ const App = {
                     // ═══════════════════════════════════════════════
                     if (action === 'buy') {
                         if (response.is_logged_in) {
-                            // Logged-in user: Go directly to checkout
-                            window.location.href = 'checkout.php';
+                            // Logged-in user: Go to cart page for proceeding to checking out
+                            window.location.href = 'cart.php';
                         } else {
                             // Guest user: Redirect to login
                             App.redirectToLogin('Please login to complete your purchase');
@@ -105,8 +105,6 @@ const App = {
      * @param {Number} productId
      */
     removeFromCart: function(productId) {
-        if (!confirm('Remove this item from your cart?')) return;
-
         $.ajax({
             url: 'ajax/update_cart.php',
             method: 'POST',

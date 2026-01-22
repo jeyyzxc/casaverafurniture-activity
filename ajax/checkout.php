@@ -56,9 +56,14 @@ $cartItems = $db->fetchAll(
 
 // Calculate totals
 $subtotal = 0;
-foreach ($cartItems as $item) {
+foreach ($cartItems as &$item) {
     $subtotal += $item['price'] * $item['quantity'];
+    
+    if (!empty($item['image']) && strpos($item['image'], '/') === false) {
+        $item['image'] = 'src/images/' . $item['image'];
+    }
 }
+unset($item);
 
 $shippingFee = 100; // Fixed shipping fee
 $total = $subtotal + $shippingFee;

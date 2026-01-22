@@ -96,7 +96,7 @@
         /**
          * Handle "Add to Cart" buttons on home page
          */
-        $(document).on('click', '.btn-action-home', function(e) {
+        $(document).off('click', '.btn-action-home').on('click', '.btn-action-home', function(e) {
             e.preventDefault();
             
             const $btn = $(this);
@@ -104,6 +104,8 @@
             const action = $btn.data('action') || 'add'; // 'add' or 'buy'
 
             // Validation
+            if ($btn.prop('disabled')) return;
+
             if (!productId) {
                 console.error('Product ID missing');
                 return;
