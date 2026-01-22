@@ -181,15 +181,3 @@ include 'includes/header.php';
 <?php include 'includes/footer.php'; ?>
 <script src="src/js/animations.js"></script>
 <script src="src/js/home.js"></script>
-<script>
-    // Fix: Ensure Add to Cart works on Home Page
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.btn-action-home').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const id = this.getAttribute('data-id');
-                if(window.App) window.App.addToCart({ id: id }, 'add', null);
-            });
-        });
-    });
-</script>

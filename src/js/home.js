@@ -36,6 +36,10 @@
             const $clonesBefore = $originalCards.slice(-2).clone().addClass('cloned');
             const $clonesAfter = $originalCards.slice(0, 2).clone().addClass('cloned');
             
+            // Remove onclick from clones to prevent double submission
+            $clonesBefore.find('.btn-action-home').removeAttr('onclick').prop('onclick', null);
+            $clonesAfter.find('.btn-action-home').removeAttr('onclick').prop('onclick', null);
+            
             $track.prepend($clonesBefore);
             $track.append($clonesAfter);
             
@@ -96,8 +100,12 @@
         /**
          * Handle "Add to Cart" buttons on home page
          */
+        // Remove inline onclick handlers to prevent double submission
+        $('.btn-action-home').removeAttr('onclick').prop('onclick', null);
+
         $(document).off('click', '.btn-action-home').on('click', '.btn-action-home', function(e) {
             e.preventDefault();
+            e.stopImmediatePropagation();
             
             const $btn = $(this);
             const productId = $btn.data('id');

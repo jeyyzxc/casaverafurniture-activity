@@ -62,10 +62,17 @@ include 'includes/header.php';
                             <span class="h4 mb-0 brand-font text-gradient-gold" id="summaryTotal">₱0.00</span>
                         </div>
 
+                        <?php if (isset($_SESSION['user_id'])): ?>
                         <button id="btnCheckout" class="btn-checkout w-100 rounded-pill py-3 mb-3 position-relative overflow-hidden">
                             <span class="position-relative z-2 fw-bold text-uppercase ls-2">Proceed to Checkout</span>
                             <div class="btn-shimmer"></div>
                         </button>
+                        <?php else: ?>
+                        <button type="button" onclick="if(typeof openLoginModal === 'function'){openLoginModal()}else{window.location.href='home.php?action=login'}" class="btn-checkout w-100 rounded-pill py-3 mb-3 position-relative overflow-hidden">
+                            <span class="position-relative z-2 fw-bold text-uppercase ls-2">Login to Checkout</span>
+                            <div class="btn-shimmer"></div>
+                        </button>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

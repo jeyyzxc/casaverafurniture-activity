@@ -39,19 +39,8 @@ try {
         // GUEST USER: Fetch from Session
         // ═══════════════════════════════════════════════════
         
-        // 1. Combine persistent and temporary carts
-        $persistent = $_SESSION['guest_cart'] ?? [];
-        $temporary = $_SESSION['guest_temp_cart'] ?? [];
-        
-        // Merge: If item exists in both, sum quantities
-        $combined = $persistent;
-        foreach ($temporary as $pid => $qty) {
-            if (isset($combined[$pid])) {
-                $combined[$pid] += $qty;
-            } else {
-                $combined[$pid] = $qty;
-            }
-        }
+        // 1. Use only persistent cart (guest_temp_cart is deprecated)
+        $combined = $_SESSION['guest_cart'] ?? [];
 
         // 2. Fetch product details from database
         if (!empty($combined)) {
@@ -73,11 +62,7 @@ try {
             }
         }
 
-        // 4. CRITICAL: Clear temporary cart after fetching
-        // This ensures "Buy Now" items don't persist
-        unset($_SESSION['guest_temp_cart']);
-        
-        // 5. Update cart count to reflect only persistent items
+        // 3. Update cart count
         $_SESSION['cart_count'] = array_sum($_SESSION['guest_cart']);
     }
 
