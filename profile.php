@@ -12,6 +12,60 @@ $db = new Database();
 $user_id = $_SESSION['user_id'];
 $user = $db->fetchOne("SELECT * FROM users WHERE id = ?", [$user_id]);
 
+if (!$user) {
+    // User might be deleted but session persists
+    header("Location: logout.php");
+    exit();
+}
+
+// --- Helper: Image Resize & Crop (Square) ---
+function resizeAndSaveImage($source, $destination, $target_size) {
+    $image_info = getimagesize($source);
+    if (!$image_info) return false;
+    
+    list($orig_w, $orig_h, $type) = $image_info;
+    
+    // Load image
+    switch ($type) {
+        case IMAGETYPE_JPEG: $image = imagecreatefromjpeg($source); break;
+        case IMAGETYPE_PNG:  $image = imagecreatefrompng($source); break;
+        case IMAGETYPE_WEBP: $image = imagecreatefromwebp($source); break;
+        default: return false;
+    }
+    if (!$image) return false;
+
+    // Calculate Crop (Center)
+    $aspect_ratio = $orig_w / $orig_h;
+    $src_x = 0; $src_y = 0; $src_w = $orig_w; $src_h = $orig_h;
+
+    if ($orig_w > $orig_h) {
+        $src_w = $orig_h;
+        $src_x = ($orig_w - $orig_h) / 2;
+    } else {
+        $src_h = $orig_w;
+        $src_y = ($orig_h - $orig_w) / 2;
+    }
+
+    // Create new square canvas
+    $new_image = imagecreatetruecolor($target_size, $target_size);
+    
+    // White background for transparency handling (since saving as JPG)
+    $white = imagecolorallocate($new_image, 255, 255, 255);
+    imagefilledrectangle($new_image, 0, 0, $target_size, $target_size, $white);
+
+    // Resample
+    imagecopyresampled($new_image, $image, 0, 0, $src_x, $src_y, $target_size, $target_size, $src_w, $src_h);
+
+    // Save
+    $result = imagejpeg($new_image, $destination, 90);
+
+    // Cleanup
+    if (isset($image) && (is_resource($image) || is_object($image))) imagedestroy($image);
+    if (isset($new_image) && (is_resource($new_image) || is_object($new_image))) imagedestroy($new_image);
+
+    return $result;
+}
+
 // Handle Avatar Upload
 if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === 0) {
     $allowed = ['jpg', 'jpeg', 'png', 'webp'];
@@ -22,12 +76,16 @@ if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === 0) {
         if (!is_dir('src/images/avatars')) {
             mkdir('src/images/avatars', 0777, true);
         }
-        // Save as user_{id}.jpg for simplicity
+        
         $target_file = 'src/images/avatars/user_' . $user_id . '.jpg';
-        move_uploaded_file($_FILES['avatar']['tmp_name'], $target_file);
-        // Refresh to show new image
-        header("Location: profile.php");
-        exit();
+        
+        // Process image (Crop to 500x500 square)
+        if (resizeAndSaveImage($_FILES['avatar']['tmp_name'], $target_file, 500)) {
+            header("Location: profile.php?msg=avatar_updated");
+            exit();
+        } else {
+            $error_msg = "Failed to process image.";
+        }
     }
 }
 
@@ -39,7 +97,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $firstname = htmlspecialchars(trim($_POST['firstname']));
     $lastname = htmlspecialchars(trim($_POST['lastname']));
     
-    if (!empty($firstname) && !empty($lastname)) {
+    // Password Logic
+    $pass_updated = false;
+    if (!empty($_POST['current_password']) && !empty($_POST['new_password'])) {
+        if (password_verify($_POST['current_password'], $user['password'])) {
+            if ($_POST['new_password'] === $_POST['confirm_password']) {
+                if (strlen($_POST['new_password']) >= 8) {
+                    $new_hash = password_hash($_POST['new_password'], PASSWORD_DEFAULT);
+                    $db->query("UPDATE users SET password = ? WHERE id = ?", [$new_hash, $user_id]);
+                    $pass_updated = true;
+                } else {
+                    $error_msg = "New password must be at least 8 characters.";
+                }
+            } else {
+                $error_msg = "New passwords do not match.";
+            }
+        } else {
+            $error_msg = "Incorrect current password.";
+        }
+    }
+    
+    if (empty($error_msg) && !empty($firstname) && !empty($lastname)) {
         // Update DB
         $db->query("UPDATE users SET firstname = ?, lastname = ? WHERE id = ?", [$firstname, $lastname, $user_id]);
         
@@ -79,7 +157,7 @@ include 'includes/header.php';
             <div class="col-lg-4">
                 <div class="profile-sidebar sticky-top" style="top: 100px; z-index: 1;">
                     <div class="profile-user-info">
-                        <div class="profile-avatar-wrapper">
+                        <div class="profile-avatar-wrapper position-relative d-inline-block">
                             <div class="profile-avatar shadow-sm" id="avatarPreview">
                                 <?php 
                                     $avatarPath = 'src/images/avatars/user_' . $user['id'] . '.jpg';
@@ -90,13 +168,13 @@ include 'includes/header.php';
                                     }
                                 ?>
                             </div>
-                            <button class="profile-avatar-upload-btn" onclick="triggerAvatarUpload()" title="Change Photo">
+                            <button id="btnAvatarUpload" class="btn btn-sm btn-gold rounded-circle position-absolute bottom-0 end-0 mb-2 me-2 shadow-sm" title="Change Photo" style="width: 35px; height: 35px;">
                                 <i class="fas fa-camera"></i>
                             </button>
                         </div>
-                        <h4 class="brand-font mb-1"><?php echo htmlspecialchars($user['firstname'] . ' ' . $user['lastname']); ?></h4>
+                        <h4 class="brand-font mb-1 text-white"><?php echo htmlspecialchars($user['firstname'] . ' ' . $user['lastname']); ?></h4>
                         <p class="text-white-50 small mb-0"><?php echo htmlspecialchars($user['email']); ?></p>
-                        <p class="text-gold small mt-2 mb-0"><i class="fas fa-crown me-1"></i> Gold Member</p>
+                        <div class="mt-3"><span class="badge bg-gold text-dark px-3 py-2 rounded-pill"><i class="fas fa-crown me-1"></i> Gold Member</span></div>
                     </div>
                     <div class="profile-nav nav flex-column" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                         <button class="nav-link active" id="v-pills-dashboard-tab" data-bs-toggle="pill" data-bs-target="#v-pills-dashboard" type="button" role="tab">
@@ -128,7 +206,7 @@ include 'includes/header.php';
                     
                     <!-- Dashboard Tab -->
                     <div class="tab-pane fade show active" id="v-pills-dashboard" role="tabpanel">
-                        <div class="profile-content-card animate-fade-up">
+                        <div class="profile-content-card fade-in-up">
                             <h3 class="brand-font mb-4">Hello, <?php echo htmlspecialchars($user['firstname']); ?>!</h3>
                             <p class="text-muted mb-5">From your account dashboard you can view your recent orders, manage your shipping and billing addresses, and edit your password and account details.</p>
                             
@@ -136,27 +214,33 @@ include 'includes/header.php';
                                 <div class="col-md-4">
                                     <div class="stat-card">
                                         <div class="stat-number">3</div>
-                                        <div class="text-muted small text-uppercase ls-1">Total Orders</div>
+                                        <div class="text-muted small text-uppercase ls-1 fw-bold">Total Orders</div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="stat-card">
                                         <div class="stat-number">0</div>
-                                        <div class="text-muted small text-uppercase ls-1">Pending</div>
+                                        <div class="text-muted small text-uppercase ls-1 fw-bold">Pending</div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="stat-card">
                                         <div class="stat-number">5</div>
-                                        <div class="text-muted small text-uppercase ls-1">Wishlist</div>
+                                        <div class="text-muted small text-uppercase ls-1 fw-bold">Wishlist</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="mt-5">
                                 <h5 class="brand-font mb-3">Recent Activity</h5>
-                                <div class="alert alert-light border-start border-gold border-3" role="alert">
-                                    <i class="fas fa-info-circle text-gold me-2"></i> You logged in from a new device on Oct 24, 2023.
+                                <div class="p-4 rounded-3 bg-light border-start border-gold border-4 shadow-sm d-flex align-items-center">
+                                    <div class="bg-white p-3 rounded-circle shadow-sm me-3 text-gold">
+                                        <i class="fas fa-shield-alt fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Security Alert</h6>
+                                        <p class="mb-0 text-muted small">You logged in from a new device on <?php echo date('M d, Y'); ?>.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -164,7 +248,7 @@ include 'includes/header.php';
 
                     <!-- Orders Tab -->
                     <div class="tab-pane fade" id="v-pills-orders" role="tabpanel">
-                        <div class="profile-content-card animate-fade-up">
+                        <div class="profile-content-card fade-in-up">
                             <h3 class="brand-font mb-4">Order History</h3>
                             
                             <!-- Mock Order Data -->
@@ -217,7 +301,7 @@ include 'includes/header.php';
 
                     <!-- Account Details Tab -->
                     <div class="tab-pane fade" id="v-pills-account" role="tabpanel">
-                        <div class="profile-content-card animate-fade-up">
+                        <div class="profile-content-card fade-in-up">
                             <h3 class="brand-font mb-4">Account Details</h3>
                             
                             <?php if($success_msg): ?>
@@ -277,7 +361,7 @@ include 'includes/header.php';
 
                     <!-- Addresses Tab -->
                     <div class="tab-pane fade" id="v-pills-address" role="tabpanel">
-                        <div class="profile-content-card animate-fade-up">
+                        <div class="profile-content-card fade-in-up">
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h3 class="brand-font mb-0">My Addresses</h3>
                                 <button class="btn btn-outline-dark btn-sm rounded-pill"><i class="fas fa-plus me-1"></i> Add New</button>
@@ -286,8 +370,8 @@ include 'includes/header.php';
                             <div class="row g-4">
                                 <div class="col-md-6">
                                     <div class="address-card default">
-                                        <div class="card-body position-relative">
-                                            <span class="badge bg-gold text-white position-absolute top-0 end-0 m-3">DEFAULT</span>
+                                        <span class="badge bg-gold text-white position-absolute top-0 end-0 m-1" style="font-size: 0.9rem; padding: 0.1em 0.1em;">DEFAULT</span>
+                                        <div class="card-body">
                                             <h6 class="fw-bold mb-3">Billing Address</h6>
                                             <address class="text-muted small mb-0">
                                                 <strong><?php echo htmlspecialchars($user['firstname'] . ' ' . $user['lastname']); ?></strong><br>

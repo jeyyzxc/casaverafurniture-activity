@@ -1,47 +1,52 @@
 /**
- * profile.js
- * Handles interactions on the user profile page
+ * Profile Page Functionality
  */
 
-document.addEventListener('DOMContentLoaded', function() {
-    'use strict';
+document.addEventListener('DOMContentLoaded', () => {
+    initAvatarUpload();
+    initAddressManagement();
+});
 
-    // 1. Avatar Upload Preview
-    const avatarInput = document.getElementById('avatarInput');
-    const avatarPreview = document.getElementById('avatarPreview');
-    const avatarForm = document.getElementById('avatarForm');
+function initAvatarUpload() {
+    const uploadBtn = document.getElementById('btnAvatarUpload');
+    const fileInput = document.getElementById('avatarInput');
+    const form = document.getElementById('avatarForm');
 
-    if (avatarInput && avatarForm) {
-        avatarInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                // Validate type
-                if (!file.type.match('image.*')) {
-                    alert('Please select an image file.');
-                    return;
+    if (uploadBtn && fileInput && form) {
+        // Trigger file input when camera button is clicked
+        uploadBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            fileInput.click();
+        });
+
+        // Auto-submit form when file is selected
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files && fileInput.files[0]) {
+                // Optional: Show loading state
+                const icon = uploadBtn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-spinner fa-spin';
                 }
-
-                // Preview logic could go here, but we will auto-submit
-                avatarForm.submit();
+                form.submit();
             }
         });
     }
+}
 
-    // 2. Smooth Tab Transition Fix
-    const triggerTabList = [].slice.call(document.querySelectorAll('#v-pills-tab button'));
-    triggerTabList.forEach(function(triggerEl) {
-        triggerEl.addEventListener('shown.bs.tab', function(event) {
-            // Optional: Scroll to top of content on mobile
-            if (window.innerWidth < 992) {
-                document.querySelector('.tab-content').scrollIntoView({ behavior: 'smooth' });
+function initAddressManagement() {
+    const deleteBtns = document.querySelectorAll('.btn-delete-address');
+    
+    deleteBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('Are you sure you want to remove this address?')) {
+                // In a real app, you would send an AJAX request here.
+                // For now, we'll just remove the element from the DOM.
+                const cardCol = btn.closest('.col-md-6');
+                if (cardCol) {
+                    cardCol.remove();
+                }
             }
         });
     });
-});
-
-/**
- * Trigger file input click
- */
-function triggerAvatarUpload() {
-    document.getElementById('avatarInput').click();
 }
