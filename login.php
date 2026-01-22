@@ -17,11 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user_name'] = $user['firstname']; // Assuming 'firstname' column exists
 
         // Redirect back to home with success message
-        header("Location: index.php?success=Welcome back");
+        header("Location: home.php?success=Welcome back");
         exit();
     } else {
         // FAILURE: Redirect with error
-        header("Location: index.php?error=Invalid credentials");
+        header("Location: home.php?error=Invalid credentials");
         exit();
     }
 }

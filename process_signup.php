@@ -3,7 +3,7 @@ require_once 'config.php';
 require_once 'classes/Database.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: index.php");
+    header("Location: home.php");
     exit();
 }
 
@@ -53,7 +53,7 @@ if (empty($errors)) {
             $_SESSION['user_firstname'] = $firstname;
             $_SESSION['user_lastname'] = $lastname;
 
-            header("Location: index.php?success=Account created successfully");
+            header("Location: home.php?success=Account created successfully");
             exit();
 
         } catch (Exception $e) {
@@ -64,6 +64,6 @@ if (empty($errors)) {
 
 // Return with Errors
 $errorString = urlencode(implode(' ', $errors));
-header("Location: index.php?error=$errorString&action=signup");
+header("Location: home.php?error=$errorString&action=signup");
 exit();
 ?>

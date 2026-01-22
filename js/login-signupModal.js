@@ -17,10 +17,26 @@ function openLoginModal(e) {
     }
 }
 
+function resetModalForm(formId) {
+    const form = document.getElementById(formId);
+    if (form) {
+        form.reset();
+        form.classList.remove('was-validated');
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.classList.remove('is-valid', 'is-invalid');
+            input.setCustomValidity('');
+            const feedback = input.parentElement.querySelector('.invalid-feedback');
+            if (feedback) feedback.textContent = '';
+        });
+    }
+}
+
 function closeLoginModal() {
     const modal = document.getElementById('loginModal');
     if(modal) {
         modal.classList.remove('active');
+        resetModalForm('loginForm');
         if (!document.getElementById('signupModal') || !document.getElementById('signupModal').classList.contains('active')) {
             document.body.classList.remove('modal-open'); 
         }
@@ -41,6 +57,7 @@ function closeSignupModal() {
     const modal = document.getElementById('signupModal');
     if(modal) {
         modal.classList.remove('active');
+        resetModalForm('signupForm');
         if (!document.getElementById('loginModal') || !document.getElementById('loginModal').classList.contains('active')) {
             document.body.classList.remove('modal-open'); 
         }
@@ -222,6 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
             let isFormValid = true;
             inputs.forEach(input => {
                 if (!validateInput(input)) {
@@ -229,11 +249,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            if (!isFormValid || !form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
             form.classList.add('was-validated');
+
+            if (!isFormValid || !form.checkValidity()) {
+                return;
+            }
+
+            // Standard submission to ensure page reload/redirect
+            form.submit();
         });
     });
 });

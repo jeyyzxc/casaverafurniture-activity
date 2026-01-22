@@ -1,5 +1,13 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
+
+// Handle Logout Logic
+if (isset($_GET['logout'])) {
+    session_unset();
+    session_destroy();
+    header("Location: home.php");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -54,12 +62,11 @@ if (session_status() === PHP_SESSION_NONE) session_start();
                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow" style="background: rgba(10,10,10,0.95);">
                             <li><a class="dropdown-item text-white hover-gold" href="profile.php">My Profile</a></li>
                             <li><hr class="dropdown-divider bg-light opacity-25"></li>
-                            <li><a class="dropdown-item text-danger" href="logout.php">Logout</a></li>
+                            <li><a class="dropdown-item text-danger" href="?logout=1">Logout</a></li>
                         </ul>
                     </div>
                 <?php else: ?>
                     <a href="#" onclick="openLoginModal(event)" class="nav-link special-login-link ms-3">Login</a>
-                    <a href="#" onclick="openSignupModal(event)" class="btn btn-sm btn-gold text-dark rounded-pill px-3 ms-2 fw-bold">Sign Up</a>
                 <?php endif; ?>
             </div>
         </div>

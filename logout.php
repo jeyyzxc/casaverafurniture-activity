@@ -16,6 +16,6 @@ if (ini_get("session.use_cookies")) {
 // 3. Destroy Session File
 session_destroy();
 
-header("Location: index.php?success=You have logged out successfully");
+header("Location: home.php?success=You have logged out successfully");
 exit();
 ?>
