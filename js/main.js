@@ -23,8 +23,8 @@ function showToast(message, type = 'info') {
 const App = {
     /**
      * Add Item to Cart
-     * @param {Object} product - Product Object
-     * @param {Function} onSuccess - Optional callback to run after success (e.g., redirect)
+     * @param {Object} product - {id: 1, ...}
+     * @param {Function} onSuccess - Optional callback (for Buy Now redirect)
      */
     addToCart: function(product, onSuccess) {
         $.ajax({
@@ -36,11 +36,11 @@ const App = {
                 if (response.success) {
                     $('.badge-cart').text(response.cart_count);
                     
-                    // If a specific success action was passed (like redirecting), run it.
+                    // If "Buy Now" (redirect), run callback
                     if (onSuccess && typeof onSuccess === 'function') {
                         onSuccess();
                     } else {
-                        // Otherwise, just show the toast
+                        // If "Add to Cart", show toast
                         showToast('Item added to cart!', 'success');
                     }
                 } else {
@@ -54,12 +54,84 @@ const App = {
         });
     },
 
+    /**
+     * Update Quantity (+ or -)
+     */
+    updateQty: function(productId, change) {
+        $.ajax({
+            url: 'ajax/update_cart_qty.php',
+            method: 'POST',
+            data: { product_id: productId, change: change },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $('.badge-cart').text(response.cart_count); // Update Header Badge
+                    
+                    // If we are on the Cart Page, reload the list
+                    if (typeof fetchCartData === 'function') {
+                        fetchCartData(); 
+                    }
+                }
+            }
+        });
+    },
+
+    /**
+     * Remove Item
+     */
+    removeFromCart: function(productId) {
+        if(!confirm("Are you sure you want to remove this item?")) return;
+
+        $.ajax({
+            url: 'ajax/remove_from_cart.php',
+            method: 'POST',
+            data: { product_id: productId },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $('.badge-cart').text(response.cart_count);
+                    showToast('Item removed', 'info');
+                    
+                    // Reload Cart Page List
+                    if (typeof fetchCartData === 'function') {
+                        fetchCartData();
+                    }
+                }
+            }
+        });
+    },
+
+    /**
+     * Clear Entire Cart
+     */
+    clearCart: function() {
+        if(!confirm("Are you sure you want to clear your entire cart?")) return;
+        
+        $.ajax({
+            url: 'ajax/clear_cart.php',
+            method: 'POST',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $('.badge-cart').text('0');
+                    showToast('Cart cleared', 'info');
+                    
+                    // Reload Cart Page List
+                    if (typeof fetchCartData === 'function') {
+                        fetchCartData();
+                    }
+                }
+            }
+        });
+    },
+
+    /**
+     * Initialize App
+     */
     init: function() {
         console.log("CASA VÉRA App Initialized");
     }
 };
-
-document.addEventListener('DOMContentLoaded', App.init);
 
 // Initialize on Document Ready
 document.addEventListener('DOMContentLoaded', App.init);

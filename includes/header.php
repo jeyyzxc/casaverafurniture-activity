@@ -54,7 +54,7 @@
 
             <div class="nav-actions d-flex align-items-center">
                 <a href="cart.php" class="nav-icon-link ms-4 position-relative" title="View Cart">
-                    <i class="fas fa-shopping-bag"></i>
+                    <i class="fas fa-shopping-cart"></i>
                     <span class="badge-cart">0</span>
                 </a>
 
