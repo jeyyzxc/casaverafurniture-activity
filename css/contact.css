@@ -1,0 +1,124 @@
+/* =========================================
+   CONTACT PAGE SPECIFIC STYLES
+   ========================================= */
+
+/* 1. Form Card */
+.contact-form-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-luxury);
+    border: 1px solid rgba(0,0,0,0.03);
+    height: 100%;
+}
+
+/* Floating Form overrides */
+.form-floating > .form-control {
+    background-color: #f8f9fa;
+    border: 1px solid transparent;
+}
+
+.form-floating > .form-control:focus {
+    background-color: #fff;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.1);
+}
+
+.form-floating > label {
+    color: var(--text-muted);
+}
+
+/* 2. Info Cards (Locations/Hours) */
+.contact-info-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.contact-info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.icon-wrapper {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-dark);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+/* 3. Action Cards (Clickable Email/Phone) */
+.contact-action-card {
+    display: block;
+    background: #fff;
+    padding: 2rem;
+    text-align: center;
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    height: 100%;
+}
+
+.contact-action-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.contact-action-card i {
+    transition: transform 0.3s ease;
+}
+
+.contact-action-card:hover i {
+    transform: scale(1.2);
+}
+
+/* 4. Map Section */
+.map-section {
+    position: relative;
+    width: 100%;
+    height: 450px;
+    background: #f0f0f0;
+}
+
+.map-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    /* Stylistic: Grayscale map for elegance */
+    filter: grayscale(100%) contrast(1.1);
+    transition: filter 0.5s ease;
+}
+
+.map-container:hover iframe {
+    /* Colorize map on hover */
+    filter: grayscale(0%);
+}
+
+/* Prevent accidental scrolling when scrolling down page */
+.map-overlay-guard {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    box-shadow: inset 0 10px 20px rgba(0,0,0,0.1);
+}
+

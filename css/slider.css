@@ -1,0 +1,146 @@
+/* =========================================
+   CASA VÉRA REUSABLE HERO SLIDER (.cv-hero)
+   ========================================= */
+
+/* 1. Base Container */
+.cv-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 700px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #000;
+    z-index: 1;
+}
+
+/* Modifier: Small Version */
+.cv-hero.cv-hero--small {
+    height: 80vh;
+    min-height: 600px;
+}
+
+/* 2. Slider Wrapper */
+.cv-hero__slider {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+}
+
+/* 3. Individual Slide */
+.cv-hero__slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    /* Effect: Blur & Scale Init */
+    filter: blur(3px);
+    transform: scale(1.05);
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+}
+
+.cv-hero__slide.active {
+    opacity: 1;
+    animation: cvZoomAndBlur 6s infinite alternate;
+}
+
+/* 4. Overlay & Content */
+.cv-hero__overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.6) 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.cv-hero__content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 15px;
+    max-width: 800px;
+}
+
+/* 5. Background Animation */
+@keyframes cvZoomAndBlur {
+    0% { transform: scale(1.05); }
+    100% { transform: scale(1.15); }
+}
+
+/* =========================================
+   TEXT GRADIENT & ANIMATIONS (Fix)
+   ========================================= */
+
+/* 1. The Shimmering Gold Text */
+.text-gradient-gold {
+    /* 1. THE LIQUID GRADIENT: High contrast Gold/White/Bronze */
+    background: linear-gradient(
+        to right,
+        #996515 0%,     /* Golden Brown */
+        #FFC107 20%,    /* Vibrant Amber Gold */
+        #FFFFE0 40%,    /* Light Yellow Shine */
+        #FFFFFF 50%,    /* Pure White Core */
+        #FFFFE0 60%,    /* Light Yellow Shine */
+        #FFC107 80%,    /* Vibrant Amber Gold */
+        #996515 100%    /* Golden Brown */
+    );
+    
+    /* 2. SIZE: 200% width allows the "Energy Core" to travel */
+    background-size: 200% auto;
+    
+    /* 3. CLIP: Mask the background to the text */
+    -webkit-background-clip: text;
+    background-clip: text;
+    
+    /* 4. TRANSPARENCY: Reveal the background */
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    
+    /* 5. ESSENTIALS for Visibility */
+    display: inline-block;
+    
+    /* 6. COMPOUND ANIMATION: Scan Color + Pulse Size */
+    animation: 
+        liquidScan 5s ease-in-out infinite alternate,
+        livePulse 5s ease-in-out infinite alternate;
+}
+
+/* 7. Liquid Scan Animation */
+@keyframes liquidScan {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+/* 8. Subtle Pulse to simulate "breathing" liquid */
+@keyframes livePulse {
+    0% { transform: scale(1); filter: brightness(100%); }
+    100% { transform: scale(1.02); filter: brightness(125%) drop-shadow(0 0 8px rgba(255, 215, 0, 0.6)); }
+}
+
+/* 3. Fade Up Animation (Essential for visibility) */
+/* If this is missing, text with 'animate-fade-up' class will stay invisible */
+.animate-fade-up {
+    opacity: 0; /* Starts invisible */
+    transform: translateY(30px);
+    animation: cvFadeUp 1s ease-out forwards;
+}
+
+/* Delays */
+.delay-100 { animation-delay: 0.2s; }
+.delay-200 { animation-delay: 0.4s; }
+
+/* The Fade Keyframes */
+@keyframes cvFadeUp {
+    to {
+        opacity: 1; /* Ends fully visible */
+        transform: translateY(0);
+    }
+}

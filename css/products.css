@@ -1,0 +1,229 @@
+/* =========================================
+   1. PRODUCTS PAGE SPECIFICS
+   ========================================= */
+
+/* Hero Overlay Refinement */
+.hero-bg-absolute {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+    /* Darker overlay for text readability */
+    background-color: rgba(0,0,0,0.4); 
+    background-blend-mode: overlay;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6));
+}
+
+/* =========================================
+   2. SIDEBAR FILTERS
+   ========================================= */
+.filter-sidebar {
+    background: rgba(255, 255, 255, 0.9);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid #eee;
+    border-radius: 8px; /* Clean radius */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    top: 100px; /* Sticky offset */
+}
+
+/* Seamless Search Input */
+.input-group-text {
+    border-color: #eee;
+    color: #999;
+}
+.filter-sidebar .form-control {
+    border-color: #eee;
+    font-size: 0.9rem;
+}
+.filter-sidebar .form-control:focus {
+    box-shadow: none;
+    border-color: var(--primary-color);
+}
+
+/* Category List */
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.category-item:hover {
+    background-color: #f8f9fa;
+    color: var(--primary-color);
+    padding-left: 16px; /* Slight slide effect */
+}
+
+.category-item.active {
+    background-color: rgba(255, 215, 0, 0.1); /* Light Gold BG */
+    color: #B8860B; /* Dark Gold Text */
+    font-weight: 600;
+}
+
+/* Custom Range Slider */
+.custom-range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    outline: none;
+}
+.custom-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--primary-color);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+.custom-range::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* =========================================
+   3. PRODUCT CARDS (Grid)
+   ========================================= */
+.product-card {
+    background: white;
+    border: none;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+}
+
+.product-img-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding-top: 110%; /* Taller aspect ratio for elegance */
+    background-color: #f8f9fa;
+}
+
+.product-img {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s ease;
+}
+
+.product-card:hover .product-img {
+    transform: scale(1.08);
+}
+
+/* Action Overlay (View + Add to Cart) */
+.product-actions-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.4s ease;
+    z-index: 2;
+}
+
+.product-card:hover .product-actions-overlay {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Action Buttons */
+.btn-action-icon {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: white;
+    color: #1a1a1a;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: 0.3s;
+    border: none;
+}
+.btn-action-icon:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-3px);
+}
+
+/* New/Sold Badges */
+.badge-luxury {
+    position: absolute;
+    top: 15px; left: 15px;
+    z-index: 3;
+    padding: 6px 12px;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+    background: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+/* 1. Rounded Apply Filter Button */
+#applyFiltersBtn {
+    border-radius: 30px !important; /* Forces rounded pill shape */
+    padding: 10px 0; /* Slightly taller for elegance */
+    letter-spacing: 1px;
+    box-shadow: 0 4px 10px rgba(184, 134, 11, 0.2); /* Soft gold shadow */
+    transition: all 0.3s ease;
+}
+
+#applyFiltersBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(184, 134, 11, 0.3);
+}
+
+/* 2. Reset Icon Effects */
+#resetFiltersIcon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: transparent;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy effect */
+}
+
+#resetFiltersIcon i {
+    font-size: 1rem;
+    color: #999;
+    transition: color 0.3s ease;
+}
+
+/* Hover State: Rotate & Color Change */
+#resetFiltersIcon:hover {
+    background-color: rgba(255, 215, 0, 0.1); /* Subtle Gold BG */
+    transform: rotate(180deg); /* Spin effect */
+}
+
+#resetFiltersIcon:hover i {
+    color: var(--primary-color); /* Turns Gold */
+}
+
+/* Active Click State */
+#resetFiltersIcon:active {
+    transform: scale(0.9) rotate(180deg); /* Press effect */
+}

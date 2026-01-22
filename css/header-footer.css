@@ -1,0 +1,306 @@
+/* ==========================================================================
+   HEADER & NAVBAR: LUXURY GLASSMORPHISM
+   ========================================================================== */
+
+/* 1. Base Navbar Structure (The Overlay) */
+.navbar {
+    height: 100px; /* Tall, elegant height */
+    width: 100%;
+    position: fixed; /* Floats on top of the page */
+    top: 0;
+    left: 0;
+    z-index: 1030; /* Above everything */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle initial border */
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smooth luxury easing */
+    
+    /* THE CONDITION: Default State (Transparent Glass) */
+    background: rgba(0, 0, 0, 0.02); /* Almost fully transparent */
+    -webkit-backdrop-filter: blur(8px); /* Safari support */
+    backdrop-filter: blur(8px); /* The "Tweak of blur" */
+}
+
+/* 2. The Scrolled "Condition" (Active State) */
+.navbar.scrolled {
+    height: 80px; /* Slightly compact on scroll */
+    background: rgba(10, 10, 10, 0.85); /* Dark Glass */
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px); /* Heavy Blur for readability */
+    border-bottom: 1px solid rgba(255, 215, 0, 0.3); /* Gold border appears */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* 3. Brand & Typography */
+.navbar-brand-centered {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+    pointer-events: none; /* Let clicks pass through to potential under-layers */
+}
+
+.brand-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #ffffff; /* Always white on glass */
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-decoration: none;
+    pointer-events: auto;
+    transition: all 0.3s ease;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.brand-logo:hover {
+    color: var(--primary-color, #FFD700);
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+.brand-tagline {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 5px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: -2px;
+    text-transform: uppercase;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+/* Hide tagline on scroll for cleaner look */
+.navbar.scrolled .brand-tagline {
+    opacity: 0;
+}
+
+/* 4. Navigation Links */
+.navbar-nav {
+    gap: 2.5rem; /* Spacious luxury feel */
+}
+
+.nav-link, .special-login-link {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #ffffff !important;
+    position: relative;
+    padding: 0 !important;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover, .special-login-link:hover, .nav-link.active {
+    opacity: 1;
+    color: var(--primary-color, #FFD700) !important;
+}
+
+/* Elegant Underline Animation */
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #FFD700, transparent);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+    transform: scaleX(1);
+}
+
+/* 5. Icons & Actions */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+.nav-icon-link {
+    color: #fff;
+    font-size: 1.1rem;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.nav-icon-link:hover {
+    color: var(--primary-color, #FFD700);
+    transform: translateY(-2px);
+}
+
+.badge-cart {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background-color: var(--primary-color, #FFD700);
+    color: #000;
+    font-size: 0.6rem;
+    font-weight: 800;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* 6. Mobile Toggle */
+.navbar-toggler {
+    border: none;
+    padding: 0;
+}
+.toggler-line {
+    display: block;
+    width: 30px;
+    height: 1px;
+    background-color: #fff;
+    margin: 6px 0;
+    transition: all 0.3s ease;
+}
+.navbar-toggler:hover .toggler-line {
+    background-color: var(--primary-color, #FFD700);
+    width: 35px; /* Slight expansion interaction */
+}
+
+/* 7. Mobile Menu Background */
+@media (max-width: 991px) {
+    .navbar-collapse {
+        background: rgba(0, 0, 0, 0.95); /* Solid dark for mobile menu readability */
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        position: absolute;
+        top: 100px;
+        left: 0;
+        width: 100%;
+        padding: 2rem;
+        border-top: 1px solid rgba(255, 215, 0, 0.2);
+        height: 100vh;
+    }
+}
+/* ==========================================================================
+   8. FOOTER
+   ========================================================================== */
+.footer-luxury {
+    background-color: #ffffff;
+    color: #1a1a1a;
+    padding-top: 2rem;    
+    padding-bottom: 1rem; 
+    position: relative;
+    z-index: 100;
+    border-top: 4px solid var(--primary-color);
+}
+
+.footer-desc {
+    color: #666;
+    line-height: 1.5; 
+    font-size: 0.85rem;
+    max-width: 350px;
+}
+
+.footer-heading {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem; 
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem; 
+}
+
+/* =========================================
+   BRAND NAME GRADIENT ONLY
+   ========================================= */
+footer .brand-font {
+    background: linear-gradient(45deg, #B8860B, #FFD700, #F9F295, #B8860B) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    color: transparent !important;
+    display: inline-block;
+    font-weight: bold;
+}
+
+/* Links List */
+.footer-links { padding: 0; margin: 0; }
+.footer-links li { margin-bottom: 4px; } 
+
+.footer-links a {
+    color: #666;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+    font-size: 0.85rem;
+}
+
+.footer-links a:hover {
+    color: var(--primary-color) !important;
+    transform: translateX(3px);
+}
+
+/* Social Icons */
+.social-icon-box {
+    width: 32px; 
+    height: 32px;
+    border: 1px solid #e0e0e0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a1a1a;
+    transition: all 0.3s ease;
+    background: #fff;
+    font-size: 0.8rem;
+}
+
+.social-icon-box:hover {
+    border-color: var(--primary-color);
+    background-color: var(--primary-color);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.footer-divider {
+    border-top: 1px solid #eee;
+    opacity: 1;
+}
+/* =========================================
+   9. SUB-FOOTER LINKS (Privacy & Terms)
+   ========================================= */
+
+/* Base Style for Policy Links */
+.footer-luxury a.small {
+    position: relative;
+    transition: color 0.3s ease;
+    display: inline-block; /* Required for the underline animation */
+    padding-bottom: 2px;
+}
+
+/* 1. Color Change on Hover */
+.footer-luxury a.small:hover,
+.hover-gold:hover {
+    color: var(--primary-color) !important; /* Turns Gold */
+}
+
+/* 2. Elegant Underline Animation */
+.footer-luxury a.small::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: 0;
+    left: 50%;
+    background-color: var(--primary-color); /* Gold Line */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transform: translateX(-50%); /* Centers the line start */
+}
+
+/* Expand line on hover */
+.footer-luxury a.small:hover::after {
+    width: 100%; /* Expands to full width */
+}

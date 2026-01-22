@@ -1,0 +1,128 @@
+/* =========================================
+   CART PAGE SPECIFIC STYLES
+   ========================================= */
+
+/* 1. Cart Item Card */
+.cart-item {
+    background: #fff;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
+}
+
+.cart-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
+    border-color: rgba(184, 134, 11, 0.2);
+}
+
+/* 2. Quantity Controls */
+.quantity-control {
+    background-color: #f8f9fa;
+    width: 120px;
+    height: 40px;
+}
+
+.quantity-control .btn {
+    width: 35px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: color 0.2s;
+}
+
+.quantity-control .btn:hover {
+    color: var(--primary-color);
+    background: rgba(0,0,0,0.02);
+}
+
+.quantity-control input {
+    background: transparent;
+    color: var(--secondary-color);
+}
+
+/* 3. Luxury Order Summary */
+.luxury-summary {
+    background: #ffffff;
+    border-radius: var(--radius-xl); /* Rounded corners for consistency */
+    box-shadow: var(--shadow-luxury);
+    border: 1px solid rgba(0,0,0,0.03);
+    position: sticky;
+    top: 120px; /* Slight offset for header */
+    overflow: hidden;
+}
+
+.summary-header {
+    background: var(--secondary-color);
+    padding: 1.5rem;
+    border-bottom: 4px solid var(--primary-color);
+}
+
+.text-gradient-gold {
+    background: linear-gradient(135deg, #B8860B 0%, #FFD700 50%, #B8860B 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: goldShine 3s linear infinite;
+}
+
+/* 4. Checkout Button & Shimmer */
+.btn-checkout {
+    background: var(--secondary-color);
+    color: #fff;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.btn-checkout:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(184, 134, 11, 0.4);
+    background: #000;
+}
+
+.btn-shimmer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 50%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,215,0,0.4), transparent);
+    transform: skewX(-20deg) translateX(-150%);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    100% { transform: skewX(-20deg) translateX(300%); }
+}
+
+/* 5. Utilities */
+.object-fit-cover {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+}
+
+.divider-dashed {
+    border-bottom: 1px dashed #e0e0e0;
+    width: 100%;
+    height: 1px;
+}
+
+.hover-danger:hover {
+    color: var(--danger-color) !important;
+    transform: scale(1.1);
+}
+
+/* Animation Entry */
+.fade-in-up {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+.delay-100 { animation-delay: 0.1s; }
+
+@keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+}

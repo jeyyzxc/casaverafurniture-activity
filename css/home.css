@@ -1,0 +1,292 @@
+/* =========================================
+   1. HERO SECTION
+   ========================================= */
+.hero-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 700px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.hero-slider {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+}
+
+.hero-slide {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(3px);
+  transform: scale(1.05);
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  animation: zoomAndBlur 6s infinite alternate;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.6) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+@keyframes zoomAndBlur {
+  0% { transform: scale(1.05); }
+  100% { transform: scale(1.15); }
+}
+
+/* =========================================
+   2. FILM ROLL (The Spotlight)
+   ========================================= */
+.film-roll-container {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background-color: #fcfcfc;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+}
+
+.film-track {
+  display: flex;
+  position: absolute;
+  left: 50%;
+  gap: 0;
+  will-change: transform;
+}
+
+.film-card {
+  flex: 0 0 300px;
+  width: 300px;
+  height: 400px;
+  margin-right: 40px;
+  position: relative;
+  transition: all 0.8s ease;
+  opacity: 0.4;
+  transform: scale(0.85);
+  filter: grayscale(100%);
+}
+
+.film-card.active {
+  opacity: 1;
+  transform: scale(1.1);
+  z-index: 10;
+  filter: grayscale(0%);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+.film-img-box {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.film-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.film-details {
+  position: absolute;
+  bottom: 25px; left: 0; right: 0;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease;
+}
+
+.film-card.active .film-details {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.film-details h4 {
+  background: #fff;
+  color: #1a1a1a;
+  display: inline-block;
+  padding: 8px 16px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  margin-bottom: 6px;
+  border-radius: 1rem;
+}
+
+.film-details p {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  margin: 0;
+}
+
+/* =========================================
+   3. CATEGORY CARDS (Curated Spaces)
+   ========================================= */
+.category-card {
+  display: block;
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  height: 300px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.4s ease;
+  text-decoration: none;
+}
+
+.category-card.large { height: 300px; }
+
+@media (min-width: 992px) {
+  .category-card, .category-card.large { height: 350px; }
+}
+
+.category-img {
+  width: 100%; height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.category-card:hover .category-img { transform: scale(1.1); }
+
+.category-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.1) 60%, transparent 100%);
+  display: flex; align-items: flex-end;
+  padding: 2rem;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.category-card:hover .category-overlay {
+  border-color: var(--primary-color);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(26, 26, 26, 0.3) 100%);
+}
+
+.category-content {
+  width: 100%;
+  transform: translateY(10px);
+  transition: transform 0.4s ease;
+}
+
+.category-card:hover .category-content { transform: translateY(0); }
+
+.category-subtitle {
+  color: var(--primary-color);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 5px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease 0.1s;
+}
+
+.category-card:hover .category-subtitle {
+  opacity: 1; transform: translateY(0);
+}
+
+.category-title {
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+/* =========================================
+   4. HOME SPECIFIC BADGES
+   ========================================= */
+/* Vibrant "Best Seller" Badge */
+.badge-vibrant {
+    background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%); /* Gold to Orange */
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(255, 140, 0, 0.5); /* Glow effect */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 8px 16px;
+}
+
+/* Muted "Sold" Badge */
+.badge-sold {
+    background-color: #e9ecef; /* Light Gray */
+    color: #6c757d; /* Muted Text */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid #dee2e6;
+    padding: 8px 16px;
+}
+
+/* Positioning wrapper (Essential) */
+.product-img-wrap {
+    position: relative; 
+}
+
+.badge {
+   position: absolute;
+   top: 15px;
+   left: 15px;
+   z-index: 10;
+   border-radius: 4px;
+}
+/* =========================================
+   5. INTERACTIVE LINKS (New Section)
+   ========================================= */
+
+/* Ensure the anchor wraps the entire image area */
+.film-link, 
+.product-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    cursor: pointer;
+    position: relative; /* For badge positioning context */
+}
+
+/* Inherit border-radius from parents to keep corners clean */
+.film-link {
+    border-radius: 8px; /* Matches .film-img-box */
+    overflow: hidden;
+}
+
+.product-link {
+    border-radius: var(--radius-md); /* Matches .product-img-wrap */
+    overflow: hidden;
+}
+
+/* Optional: Slight hover effect on image when linked */
+.film-link:hover img,
+.product-link:hover img {
+    opacity: 0.95; 
+    /* The scale transform is already handled by existing CSS, 
+       this just adds a subtle brightness hint */
+}
