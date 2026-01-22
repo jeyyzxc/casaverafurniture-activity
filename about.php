@@ -331,4 +331,4 @@ include 'includes/header.php';
 
 <?php include 'includes/footer.php'; ?>
 
-<script src="src/js/animations.js"></script>
+<script src="js/animations.js"></script>
